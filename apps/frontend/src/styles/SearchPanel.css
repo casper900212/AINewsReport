@@ -1,0 +1,62 @@
+/* 外層垂直置中用 */
+.search-panel-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+/* ✅ 將 search-panel + 按鈕 並排 */
+.search-panel-container {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  max-width: 1000px;
+  width: 100%;
+}
+/* ✅ 主格線區域 */
+.search-panel {
+  display: grid;
+  grid-template-columns: 240px 240px;
+  gap: 1rem 2rem;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+}
+
+/* ✅ 查詢按鈕獨立置中對齊 */
+.search-button {
+  padding: 8px 16px;         /* ✅ 高度變小 */
+  min-width: 100px;          /* ✅ 避免過寬 */
+  font-size: 14px; 
+  height: fit-content;
+  background-color: #223e7b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.search-button:hover {
+  background-color: #3a53a4;
+}
+
+.input-group {
+  width: 240px;
+}
+
+.search-input {
+  width: 240px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.search-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 三欄 */
+  gap: 1rem;                             /* 間距 */
+}

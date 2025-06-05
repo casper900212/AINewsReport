@@ -1,0 +1,30 @@
+/* 🧾 外層容器 */
+.prompt-history {
+    width: 100%;
+    padding: 1rem;
+    border-right: 1px solid #eee;
+    overflow-y: auto;
+  }
+  
+  /* 📄 單一項目 */
+  .prompt-history-item {
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s ease;
+  }
+  
+  /* 📌 Hover 效果 */
+  .prompt-history-item:hover {
+    background-color: #f5f5f5;
+  }
+  
+  /* ✅ Active 狀態 */
+  .prompt-history-item.active {
+    background-color: #e0e7ff;
+    font-weight: 500;
+    color: #1e3a8a;
+  }
+  

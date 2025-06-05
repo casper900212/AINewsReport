@@ -1,0 +1,109 @@
+/* ────────── Sidebar 容器 ────────── */
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  transition: width 0.3s ease;
+  overflow: visible;           /* ✅ 讓收合按鈕可超出顯示 */
+  background-color: #fcfcfc;
+  color: #000;
+  border-right: 1px solid #f1ecec;
+  position: relative;          /* ✅ 讓收合按鈕絕對定位 */
+}
+
+.sidebar.collapsed {
+  width: 1.5rem;               /* ✅ 保留給收合按鈕 */
+  border-right: none;
+}
+
+.sidebar-header {
+  height: 2.5rem;             /* ✅ 保留空間讓收合按鈕不重疊 */
+  display: flex;
+  justify-content: flex-end;  /* ✅ 右對齊按鈕 */
+  padding: 0.5rem 1rem;
+  position: relative;        
+
+}
+
+/* ────────── 收合按鈕 ────────── */
+.sidebar-collapse-button {
+  all: unset; /* ✅ 清除瀏覽器預設樣式 */
+  position: absolute;
+  top: 1rem;
+  right: -0.2rem;              /* ✅ 推到外側 */
+  border: none;
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+  z-index: 10;
+}
+
+.sidebar-collapse-button:hover {
+  background-color: #d0d0d0;
+}
+
+/* ────────── 按鈕群區 ────────── */
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ────────── 通用項目 ────────── */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  color: #000;
+  transition: background-color 0.2s;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-item.active {
+  background-color: #d0d0d0;
+  font-weight: 500;
+}
+
+.sidebar-item:hover {
+  background-color: #f0f0f0;
+}
+
+/* ────────── 子項目 ────────── */
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-sublist {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1.5rem;
+  gap: 0.25rem;
+}
+
+.sidebar-subitem {
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #333;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.sidebar-subitem:hover {
+  background-color: #f0f0f0;
+}
