@@ -1,12 +1,12 @@
 {
-  "name": "news-monthly-reportnews-monthly-report",
-  "version": "1.0.0",
+  "name": "rag-service",
+  "private": true,
+  "version": "0.1.0",
   "description": "一個開源工具，用來爬取新聞網站並根據產業分類自動生成 Markdown 與 PDF 格式的月報。   內建支援本地語言模型（如 LLaMA3、Mistral via Ollama），方便部署於企業內部、學術或地方政府使用。",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "@langchain/core": "^0.3.47",
@@ -17,6 +17,8 @@
     "langchain": "^0.3.24"
   },
   "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.14.1"
   }
 }
