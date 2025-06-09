@@ -1,0 +1,45 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/sever.js",
+  "private": true,
+  "scripts": {
+    "start": "node dist/server.js",
+    "start:dev": "npm run build && nodemon",
+    "build": "rm -rf dist; tsoa spec-and-routes && tsc --project tsconfig-build.json",
+    "eslint": "eslint -c .eslintrc \"./**/*.ts\"",
+    "eslint:fix": "eslint --fix \"./src/*.ts\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.30",
+    "@types/swagger-ui-express": "^4.1.8",
+    "ericlint": "^1.1.17",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "swagger-ui-express": "^5.0.1",
+    "tsoa": "^6.6.0",
+    "typeorm": "^0.3.24",
+    "winston": "^3.17.0"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "legacyWatch": true,
+    "ext": "ts",
+    "exec": "npm run build-route && npm run build-swagger && ts-node --transpile-only src/server.ts",
+    "ignore": [
+      "src/routes"
+    ]
+  }
+}

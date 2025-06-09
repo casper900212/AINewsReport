@@ -1,0 +1,10 @@
+node_modules
+env.json
+dist/
+.env
+.vscode
+.nyc_output/
+
+# Generate by tsoa
+public/swagger.json
+src/routes/*.ts

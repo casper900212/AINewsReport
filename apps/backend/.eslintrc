@@ -1,0 +1,38 @@
+{
+  "extends": [
+    "./node_modules/ericlint"
+  ],
+  "parserOptions": {
+      "project": "tsconfig.json"
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/db/entity/*.ts",
+        "src/models/*Model.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/naming-convention": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "indent": "off"
+      }
+    },
+    {
+      "files": [
+        "src/db/entity/*.ts"
+      ],
+      "rules": {
+        "import/no-cycle": "off"
+      }
+    },
+    {
+      "files": [
+        "src/db/seed/*.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/naming-convention": "off",
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    }
+  ]
+}
