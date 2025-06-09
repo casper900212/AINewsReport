@@ -4,7 +4,11 @@ import { useProductionStore } from "../stores/useProductionStore";
 import { MdDelete } from "react-icons/md";
 import "../styles/Sidebar.css";
 
-export default function ProducePanel() {
+interface ProducePanelProps {
+  onSelect: (label: string) => void;
+}
+
+export default function ProducePanel({ onSelect }: ProducePanelProps) {
   const [expanded, setExpanded] = useState(false);
   const records = useProductionStore((state) => state.records);
   const deleteRecord = useProductionStore(
@@ -20,7 +24,8 @@ export default function ProducePanel() {
   };
 
   const handleClick = (id: string) => {
-    navigate(`/produce/${id}`); // ✅ 改成 produce
+    navigate(`/produce/${id}`);
+    onSelect(id);  
   };
 
   return (
@@ -38,7 +43,7 @@ export default function ProducePanel() {
                 onClick={() => handleClick(r.id)}
               >
                 <div className="item-info">
-                來源：{r.source}｜關鍵字：{r.keyword}
+                  來源：{r.source}｜關鍵字：{r.keyword}
                 </div>
                 <div className="item-date">
                   {Array.isArray(r.dateRange)

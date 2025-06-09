@@ -68,7 +68,7 @@ export default function ResultCanva({
         <h2>查詢結果報告</h2>
         <button
           className="export-button"
-          onClick={(e) => {
+          onClick={() => {
             console.log("Button clicked");
             handleExport();
           }}

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
-import { useProductionStore } from "../stores/useProductionStore.ts";
-import ResultCanva from "../components/ResultCanva.tsx";
+import { useProductionStore } from "../stores/useProductionStore";
+import ResultCanva from "../components/ResultCanva";
 
 export default function ProductionPage() {
   const { id } = useParams<{ id: string }>();
@@ -14,7 +14,7 @@ export default function ProductionPage() {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <ResultCanva />
+      <ResultCanva record={record} />
     </div>
   );
 }
