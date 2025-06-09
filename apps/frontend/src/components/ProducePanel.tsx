@@ -1,32 +1,58 @@
-import { useState } from 'react';
-import '../styles/Sidebar.css';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useProductionStore } from "../stores/useProductionStore";
+import { MdDelete } from "react-icons/md";
+import "../styles/Sidebar.css";
 
-export default function ProducePanel({
-  onSelect,
-}: {
-  onSelect: (item: string) => void;
-}) {
+export default function ProducePanel() {
   const [expanded, setExpanded] = useState(false);
-  const produceItems = ['產製紀錄1', '產製紀錄2', '產製紀錄3', '產製紀錄4'];
+  const records = useProductionStore((state) => state.records);
+  const deleteRecord = useProductionStore(
+    (state) => state.deleteProductionRecord
+  );
+  const navigate = useNavigate();
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (confirm("確定要刪除這筆產製紀錄嗎？")) {
+      deleteRecord(id);
+    }
+  };
+
+  const handleClick = (id: string) => {
+    navigate(`/produce/${id}`); // ✅ 改成 produce
+  };
 
   return (
     <div className="history-panel">
-      {/* ✅ 主按鈕：不內縮 */}
       <button className="sidebar-item" onClick={() => setExpanded(!expanded)}>
         產製紀錄
       </button>
 
-      {/* ✅ 子項清單：內縮樣式 */}
       {expanded && (
         <div className="sidebar-sublist">
-          {produceItems.map((item, index) => (
-            <button
-              key={index}
-              className="sidebar-subitem"
-              onClick={() => onSelect(item)}
-            >
-              {item}
-            </button>
+          {records.map((r) => (
+            <div key={r.id} className="sidebar-subitem-wrapper">
+              <button
+                className="sidebar-subitem"
+                onClick={() => handleClick(r.id)}
+              >
+                <div className="item-info">
+                來源：{r.source}｜關鍵字：{r.keyword}
+                </div>
+                <div className="item-date">
+                  {Array.isArray(r.dateRange)
+                    ? `${r.dateRange[0]} ~ ${r.dateRange[1]}`
+                    : r.dateRange}
+                </div>
+              </button>
+              <button
+                className="sidebar-delete-button"
+                onClick={(e) => handleDelete(e, r.id)}
+              >
+                <MdDelete />
+              </button>
+            </div>
           ))}
         </div>
       )}

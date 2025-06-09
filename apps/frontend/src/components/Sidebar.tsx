@@ -14,10 +14,6 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     console.log('選擇歷史紀錄:', label);
   };
 
-  const handleSubscriptionSelect = (label: string) => {
-    console.log('選擇訂閱紀錄:', label);
-  };
-
   const handleOrderSelect = (label: string) => {
     console.log('選擇產製紀錄:', label);
   };
@@ -36,25 +32,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           {/* ✅ 功能清單 */}
           <div className="sidebar-section">
             <HistoryPanel onSelect={handleHistorySelect} />
-            <SubscriptionPanel onSelect={handleSubscriptionSelect} />
+            <SubscriptionPanel />
             <ProducePanel onSelect={handleOrderSelect} />
           </div>
         </>
       )}
     </div>
-  );
-}
-
-function SidebarItem({
-  label,
-  active = false,
-}: {
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <button className={`sidebar-item ${active ? 'active' : ''}`}>
-      <span>{label}</span>
-    </button>
   );
 }

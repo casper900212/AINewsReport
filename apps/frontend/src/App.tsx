@@ -4,6 +4,9 @@ import SearchPanel from './components/SearchPanel';
 import { FaAngleRight } from 'react-icons/fa';
 import { Routes, Route } from 'react-router-dom';
 import ResultPage from './components/ResultPage';
+import SubscriptionPage from './pages/SubscriptionPage';
+import ProductionPage from './pages/ProductionPage';
+
 
 function App() {
   const [collapsed, setCollapsed] = useState(false);
@@ -42,11 +45,13 @@ function App() {
           </button>
         )}
 
-        <div style={{ padding: '2rem' }}>
+        <div>
           <Routes>
             <Route path="/" element={<SearchPanel />} />
-            <Route path="/:historyId" element={<ResultPage />} />
-          </Routes>
+            <Route path="/history/:historyId" element={<ResultPage />} />
+            <Route path="/subscriptions" element={<SubscriptionPage />} />
+            <Route path="/produce/:id" element={<ProductionPage />} />
+            </Routes>
         </div>
       </div>
     </div>

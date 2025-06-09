@@ -1,32 +1,27 @@
-/* ⬛ 整體容器 */
 .result-page-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
 
-/* 🔳 搜尋列卡片容器 */
 .result-page-container .search-header {
   position: relative;
-  top: -80px;
+  top: -60px;
   margin: 0 auto;
   width: 100%;
   max-width: 1280px;
   background-color: #fff;
-  border-bottom: 1px solid #ddd;
   padding: 1rem 2rem;
   z-index: 10;
-  display: flex;
-  justify-content: center;
+  flex-direction: column; 
+  align-items: stretch;
   box-sizing: border-box;
 }
 
-/* ✅ 包住 SearchPanel */
 .result-page-container .search-panel-wrapper {
   width: 100%;
 }
 
-/* ✅ SearchPanel 裡的欄位橫向排列 */
 .result-page-container .search-panel-grid {
   display: flex;
   flex-wrap: nowrap;
@@ -34,29 +29,25 @@
   width: 100%;
 }
 
-/* ✅ 每個欄位寬度設定 */
-.result-page-container .input-group:nth-child(1),  /* 類別 */
-.result-page-container .input-group:nth-child(2) { /* 來源 */
+.result-page-container .input-group:nth-child(1), 
+.result-page-container .input-group:nth-child(2) { 
   flex: 0 0 140px;
 }
 
-.result-page-container .input-group:nth-child(3) { /* 日期區間 */
+.result-page-container .input-group:nth-child(3) { 
   flex: 0 0 220px;
 }
 
-.result-page-container .input-group:nth-child(4) { /* 關鍵字 */
-  flex: 0 0 100px;
-  min-width: 120px;
+.result-page-container .input-group:nth-child(4) { 
+  flex: 0 0 120px;
 }
 
-.result-page-container .input-group:nth-child(5) { /* 筆數 */
-  flex: 0 0 100px;
-  min-width: 165px;
+.result-page-container .input-group:nth-child(5) { 
+  flex: 0 0 165px;
 }
 
-.result-page-container .input-group:nth-child(6) { /* 查詢按鈕 */
-  flex: 0 0 80px;
-  max-width: 100px;
+.result-page-container .input-group:nth-child(6) { 
+  flex: 0 0 100px;
   white-space: nowrap;
 }
 
@@ -100,38 +91,49 @@
 /* ✅ 主體左右分欄佈局 */
 .result-layout {
   display: flex;
+  height: 100vh; 
   flex: 1;
-  height: calc(100vh - 100px); /* 預留 SearchPanel 高度 */
+  height: calc(100vh - 100px);
   overflow: hidden;
+  padding-top: 0;    
+  margin-top: -60px;
+  border-top: 1px solid #ddd;
+
+
 }
 
-/* ✅ 左欄（PromptHistory + PromptInput） */
 .left-panel {
-  width: 400px;
+  width: 500px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #ddd;
   background-color: #f8f9fa;
   box-sizing: border-box;
+  margin-top: 0;
+  height: 84vh;
 }
 
-/* ✅ PromptHistory 區域 */
-.prompt-history-wrapper {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-}
-
-/* ✅ PromptInput 區域 */
-.prompt-input-wrapper {
-  padding: 1rem;
-  border-top: 1px solid #ccc;
-}
-
-/* ✅ 右欄（畫布區） */
-.right-panel {
-  flex: 1;
-  overflow-y: auto;
-  padding: 2rem;
+.crawler-updated-time {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  padding: 0.5rem 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
   box-sizing: border-box;
+}
+
+.export-button {
+  background-color: #315881;
+  color: white;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+}
+
+.export-button:hover {
+  background-color: #0056b3;
 }
