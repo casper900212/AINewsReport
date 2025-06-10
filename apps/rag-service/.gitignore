@@ -3,3 +3,4 @@ reportnews
 outputs
 qdrant_data
 data
+__pycache__

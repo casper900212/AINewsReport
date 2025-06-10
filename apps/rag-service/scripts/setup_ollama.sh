@@ -9,7 +9,7 @@
 echo "Start Ollama service in background ..."
 brew services start ollama
 
-echo "⬇️ Pulling mistral model..."
-ollama pull mistral
+echo "⬇️ Pulling gemma3 model..."
+ollama pull gemma3:latest
 
-echo "✅ Done! You can now run: ollama run mistral"
+echo "✅ Done! You can now run: ollama run gemma3"

@@ -5,84 +5,119 @@ from qdrant_client.models import Filter, FieldCondition, MatchValue, Distance, V
 from qdrant_client.http.exceptions import UnexpectedResponse
 import json
 import time
+import argparse
+from datetime import datetime
 
-qdrant = QdrantClient(url="http://localhost:6333")
-collection_name = "blocktempo-articles-2025-05-original"
+def validate_month(month: str) -> bool:
+    """驗證月份格式是否正確"""
+    try:
+        datetime.strptime(month, '%Y-%m')
+        return True
+    except ValueError:
+        return False
 
-# 建立 collection（若尚未存在）
-try:
-    qdrant.get_collection(collection_name=collection_name)
-    print(f"✅ Collection '{collection_name}' already exists.")
-    '''
-    # Delete existing collection to recreate with correct dimensions
-    qdrant.delete_collection(collection_name=collection_name)
-    print(f"🗑️ Deleted existing collection to update dimensions")
-    '''
-except UnexpectedResponse as e:
-    if e.status_code == 404:
-        print(f"🆕 Collection '{collection_name}' does not exist. Creating it.")
-        qdrant.create_collection(
-            collection_name=collection_name,
-            vectors_config=VectorParams(size=768, distance=Distance.COSINE),
-        )
-    else:
-        raise e
+def main():
+    # 設置命令行參數
+    parser = argparse.ArgumentParser(description='將文章轉換為向量並存儲到 Qdrant')
+    parser.add_argument('--source', type=str, required=True, help='來源媒體 (例如: blocktempo)')
+    parser.add_argument('--month', type=str, required=True, help='目標月份 (格式: YYYY-MM)')
+    args = parser.parse_args()
 
-# 清空舊資料（⚠️小心：這會刪光 collection 中所有資料）
-qdrant.delete(
-    collection_name=collection_name,
-    points_selector=Filter(must=[])  # 空條件代表刪除全部
-)
-print(f"🧹 清空 collection '{collection_name}' 的所有資料")
+    # 驗證月份格式
+    if not validate_month(args.month):
+        print("❌ 錯誤：月份格式必須為 YYYY-MM")
+        return
 
-# 讀取多筆新聞資料
-with open("../../data/blocktempo_articles_2025-05_full.json", "r", encoding="utf-8") as f:
-    news_items = json.load(f)
+    # 構建 collection 名稱
+    collection_name = f"{args.source}-articles-{args.month}-original"
+    print(f"📊 使用集合: {collection_name}")
 
-# Start timing
-start_time = time.time()
+    # 初始化 Qdrant 客戶端
+    qdrant = QdrantClient(url="http://localhost:6333")
 
-model = SentenceTransformer("sentence-transformers/msmarco-bert-base-dot-v5")
+    # 建立 collection（若尚未存在）
+    try:
+        qdrant.get_collection(collection_name=collection_name)
+        print(f"✅ Collection '{collection_name}' already exists.")
+    except UnexpectedResponse as e:
+        if e.status_code == 404:
+            print(f"🆕 Collection '{collection_name}' does not exist. Creating it.")
+            qdrant.create_collection(
+                collection_name=collection_name,
+                vectors_config=VectorParams(size=768, distance=Distance.COSINE),
+            )
+        else:
+            raise e
 
-points = []
-id_counter = 0
+    # 清空舊資料（⚠️小心：這會刪光 collection 中所有資料）
+    qdrant.delete(
+        collection_name=collection_name,
+        points_selector=Filter(must=[])  # 空條件代表刪除全部
+    )
+    print(f"🧹 清空 collection '{collection_name}' 的所有資料")
 
-for item in news_items:
-    content = item["text"]
-    title = item.get("title", "")
-    date = item.get("publish_date", "")
-    url = item.get("url", "")
-    
-    print(f"Processing item: {title} - {date} - {url}\n")
+    # 讀取新聞資料
+    input_file = f"../../data/{args.source}_articles_{args.month}_full.json"
+    try:
+        with open(input_file, "r", encoding="utf-8") as f:
+            news_items = json.load(f)
+    except FileNotFoundError:
+        print(f"❌ 錯誤：找不到檔案 {input_file}")
+        return
+    except json.JSONDecodeError:
+        print(f"❌ 錯誤：檔案 {input_file} 格式不正確")
+        return
 
-    # 分段處理
-    chunk_size = 500
-    chunk_overlap = 10
-    chunks = [content[i:i + chunk_size] for i in range(0, len(content), chunk_size - chunk_overlap)]
+    # Start timing
+    start_time = time.time()
 
-    vectors = model.encode(chunks)
+    model = SentenceTransformer("sentence-transformers/msmarco-bert-base-dot-v5")
 
-    for i, (vec, chunk) in enumerate(zip(vectors, chunks)):
-        if isinstance(chunk, str) and chunk.strip():  # 濾掉空段
-            points.append(PointStruct(
-                id=id_counter,
-                vector=vec.tolist(),
-                payload={
-                    "text": chunk, # This is your main content, correctly mapped by content_payload_key="text"
-                    "metadata": { # <<<--- ADDED THIS NESTED DICTIONARY
-                        "title": title,
-                        "publish_date": date,
-                        "url": url
+    points = []
+    id_counter = 0
+
+    for item in news_items:
+        content = item["text"]
+        title = item.get("title", "")
+        date = item.get("publish_date", "")
+        url = item.get("url", "")
+        
+        print(f"Processing item: {title} - {date} - {url}\n")
+
+        # 分段處理
+        chunk_size = 500
+        chunk_overlap = 10
+        chunks = [content[i:i + chunk_size] for i in range(0, len(content), chunk_size - chunk_overlap)]
+        content_id = 1 # 辨別第幾個chunk
+
+        vectors = model.encode(chunks)
+
+        for i, (vec, chunk) in enumerate(zip(vectors, chunks)):
+            if isinstance(chunk, str) and chunk.strip():  # 濾掉空段
+                points.append(PointStruct(
+                    id=id_counter,
+                    vector=vec.tolist(),
+                    payload={
+                        "text": chunk,
+                        "metadata": {
+                            "title": title,
+                            "publish_date": date,
+                            "url": url,
+                            "id": content_id
+                        }
                     }
-                }
-            ))
-            id_counter += 1
+                ))
+                content_id += 1
+                id_counter += 1
 
-# 上傳到 Qdrant
-qdrant.upsert(collection_name=collection_name, points=points)
+    # 上傳到 Qdrant
+    qdrant.upsert(collection_name=collection_name, points=points)
 
-# Calculate and print elapsed time
-end_time = time.time()
-elapsed_time = end_time - start_time
-print(f"⏱️ 向量化與儲存耗時: {elapsed_time:.2f} 秒")
-print(f"✅ 完成上傳 {len(points)} 筆向量至 Qdrant collection '{collection_name}'")
+    # Calculate and print elapsed time
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"⏱️ 向量化與儲存耗時: {elapsed_time:.2f} 秒")
+    print(f"✅ 完成上傳 {len(points)} 筆向量至 Qdrant collection '{collection_name}'")
+
+if __name__ == "__main__":
+    main()
