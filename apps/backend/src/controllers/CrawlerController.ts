@@ -1,11 +1,10 @@
 import { Body, Controller, Delete, Get, Patch, Path, Post, Response, Route, Tags } from 'tsoa'
 import { CreateCrawlerModel, CreateCrawlerResponseModel, ExpectedErrorResponseModel, GetCrawlerListResponseModel, SuccessResponseModel, UnexpectedErrorResponseModel, UpdateCrawlerModel } from '../models'
-import { createCrawler, deleteCrawler, executeCrawler, getCrawlerList, updateCrawler } from '../services/crawlerService'
+import { createCrawler, deleteCrawler, executeCrawler, getCrawlerList, updateCrawler } from '../services'
 import { sendOk } from '../utils/routeHelper'
 
 @Tags('Crawler')
 @Route('crawler')
-
 export class CrawlerController extends Controller {
   /**
    * @summary [CLI] 將爬蟲來源資訊寫入 DB
@@ -15,7 +14,7 @@ export class CrawlerController extends Controller {
   @Response<ExpectedErrorResponseModel>(400, 'Expected error')
   @Response<UnexpectedErrorResponseModel>(500, 'Unexpected error')
   public async createCrawler (
-     @Body() requestBody: CreateCrawlerModel,
+    @Body() requestBody: CreateCrawlerModel,
   ): Promise<CreateCrawlerResponseModel> {
     const crawler = await createCrawler(requestBody)
     return sendOk({ data: crawler })
@@ -58,8 +57,6 @@ export class CrawlerController extends Controller {
   public async deleteCrawler (
     @Path() id: number,
   ): Promise<SuccessResponseModel> {
-    // Logic to delete the crawler by ID
-    // This is a placeholder function and should be implemented with actual database logic
     await deleteCrawler(id)
     return sendOk()
   }
