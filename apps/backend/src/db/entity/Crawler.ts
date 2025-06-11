@@ -1,7 +1,7 @@
 import { Column, Entity } from 'typeorm'
 import Base from './Base'
 
-@Entity()
+@Entity('crawler')
 export default class Crawler extends Base {
   @Column('varchar', { length: 100, unique: true })
   name!: string
