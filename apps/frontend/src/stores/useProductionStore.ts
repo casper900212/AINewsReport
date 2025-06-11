@@ -6,7 +6,7 @@ export interface ProductionRecord {
   keyword: string;
   category: string;
   source: string;
-  dateRange: string;
+  startDate: string;
   limit: number;
   createdAt: string;
 }

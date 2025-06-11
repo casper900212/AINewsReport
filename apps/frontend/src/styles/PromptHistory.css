@@ -8,7 +8,7 @@
 .prompt-history-title {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-bottom: 30px;
 }
 
 .chat-history-list {
@@ -39,4 +39,16 @@
   background-color: #e6e6e6;
   align-self: flex-start;
   text-align: left;
+}
+.prompt-history-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapse-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }

@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { IoNewspaper } from "react-icons/io5";
 import ChatApp from "./ChatApp";
 import "../styles/ResultPage.css";
 import { useProductionStore } from "../stores/useProductionStore";
@@ -14,24 +15,21 @@ export default function ResultPage() {
     (state) => state.addProductionRecord
   );
 
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const handleToggleCollapse = () => setIsCollapsed((prev) => !prev);
+
   useEffect(() => {
-    console.log("useEffect fired. historyId:", historyId);
     if (historyId) {
-      if (historyId.startsWith("fake_")) {
-        const fakeRecord = useFakeSearchStore
-          .getState()
-          .records.find((r) => r.id === historyId);
-        if (fakeRecord) {
-          console.log("✅ fakeRecord found:", fakeRecord);
-          setRecord(fakeRecord);
-        } else {
-          console.warn("❌ 找不到假資料！");
-        }
+      const localRecord = useFakeSearchStore
+        .getState()
+        .records.find((r) => r.id === historyId);
+  
+      if (localRecord) {
+        setRecord(localRecord);
       } else {
         fetch(`${import.meta.env.VITE_API_BASE}/history/${historyId}`)
           .then((res) => res.json())
           .then((res) => {
-            console.log("✅ API response:", res);
             setRecord(res.data);
           })
           .catch((err) => {
@@ -40,7 +38,6 @@ export default function ResultPage() {
       }
     }
   }, [historyId]);
-  
 
   if (!historyId || !record) {
     return <p style={{ padding: "1rem" }}>載入中...</p>;
@@ -48,21 +45,70 @@ export default function ResultPage() {
 
   return (
     <div className="result-page-container">
-      <div className="result-layout">
-        <div className="left-panel">
+      <div
+        className="result-layout"
+        style={{
+          position: "relative",
+          height: "100%",
+          display: "flex",
+        }}
+      >
+        {/* 左側 ChatApp */}
+        <div
+          className="left-panel"
+          style={{
+            flex: 1,
+            marginRight: isCollapsed ? "0px" : "700px",
+            transition: "margin-right 0.3s ease",
+          }}
+        >
           <ChatApp
             historyId={historyId!}
             onPromptChange={(prompt) => setCurrentPrompt(prompt)}
-            onReplyChange={() => {}} 
+            onReplyChange={() => {}}
           />
         </div>
-        <div className="right-panel">
+
+        {/* 右側報告面板 */}
+        <div
+          className="right-panel"
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            width: "700px",
+            height: "100%",
+            zIndex: 1000,
+            transform: isCollapsed ? "translateX(100%)" : "translateX(0%)",
+            transition: "transform 0.5s ease",
+          }}
+        >
           <ResultCanva
             record={record}
             currentPrompt={currentPrompt}
             addProductionRecord={addProductionRecord}
+            isCollapsed={isCollapsed}
+            onToggleCollapse={handleToggleCollapse}
           />
         </div>
+
+        {/* 收合狀態下的展開按鈕 */}
+        {isCollapsed && (
+          <button
+            onClick={handleToggleCollapse}
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              zIndex: 1100,
+            }}
+          >
+            <IoNewspaper size={24} color="#315881" />
+          </button>
+        )}
       </div>
     </div>
   );
