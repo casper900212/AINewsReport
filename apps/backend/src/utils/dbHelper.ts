@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 /* eslint-disable @typescript-eslint/naming-convention */
 import { dbConfig } from '../config'
 import { DataSource } from 'typeorm'
