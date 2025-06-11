@@ -46,7 +46,10 @@ export default function HistoryPanel({
                 className="sidebar-subitem"
                 onClick={() => handleClick(record.id)}
               >
-                {record.query || record.id}
+                <div className="item-info">
+                  來源：{record.source}｜關鍵字：{record.keyword}
+                  <div className="item-date">{record.startDate}</div>
+                </div>
               </button>
               <button
                 className="sidebar-delete-button"

@@ -44,11 +44,7 @@ export default function ProducePanel({ onSelect }: ProducePanelProps) {
               >
                 <div className="item-info">
                   來源：{r.source}｜關鍵字：{r.keyword}
-                </div>
-                <div className="item-date">
-                  {Array.isArray(r.dateRange)
-                    ? `${r.dateRange[0]} ~ ${r.dateRange[1]}`
-                    : r.dateRange}
+                  <div className="item-date">{r.startDate}</div>
                 </div>
               </button>
               <button

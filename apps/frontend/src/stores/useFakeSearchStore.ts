@@ -11,8 +11,8 @@ export interface SearchRecord {
   category: string;
   source: string;
   startDate: string;
-  endDate: string;
   limit: string;
+  keyword: string,
   messages: Message[];
 }
 
@@ -57,7 +57,7 @@ export const useFakeSearchStore = create<FakeSearchStore>((set, get) => ({
 關鍵字：${newRecord.query}
 類別：${newRecord.category}
 來源：${newRecord.source}
-區間：${newRecord.startDate} ~ ${newRecord.endDate}
+區間：${newRecord.startDate}
 筆數：${newRecord.limit}`,
     };
 
