@@ -1,12 +1,18 @@
 import { Controller, Get, Post, Response, Route, Tags } from 'tsoa'
-import { ExpectedErrorResponseModel, UnexpectedErrorResponseModel } from '../models'
-import { GetLatestVectorDBUpdateResponseModel, LogVectorDBUpdateResponseModel } from '../models/vectorDBUpdateModel'
-import { logVectorDBUpdate, getLatestVectorDBUpdate } from '../services/vectorDBUpdateService'
+import {
+  ExpectedErrorResponseModel,
+  GetLatestVectorDBUpdateResponseModel,
+  LogVectorDBUpdateResponseModel,
+  UnexpectedErrorResponseModel,
+} from '../models'
+import {
+  getLatestVectorDBUpdate,
+  logVectorDBUpdate,
+} from '../services'
 import { sendOk } from '../utils/routeHelper'
 
 @Tags('VectorDBUpdate')
 @Route('vdb-update')
-
 export class VectorDBUpdateController extends Controller {
   /**
    * @summary [CLI] 新增向量資料庫更新時間
