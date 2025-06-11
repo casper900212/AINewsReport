@@ -44,6 +44,7 @@
 
 .input-group {
   width: 240px;
+  
 }
 
 .search-input {
@@ -54,6 +55,35 @@
 }
 .search-panel-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); 
-  gap: 1rem;                             
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem 2rem;
+  align-items: center;
+  justify-items: center;
+}
+
+
+.last-updated-time {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+}
+.fade-out {
+  animation: fadeOut 0.3s forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+.item-date {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.2rem;
 }

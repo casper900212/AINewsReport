@@ -1,15 +1,11 @@
 import { useState, useEffect } from "react";
 import Select from "react-select";
-import { DateRangePicker } from "rsuite";
-import { subDays, startOfDay, startOfMonth } from "date-fns";
-import zhTW from "rsuite/locales/zh_TW";
+import { Select as SemiSelect } from "@douyinfe/semi-ui";
 import "../styles/SearchPanel.css";
 import { useNavigate } from "react-router-dom";
-import { useFakeSearchStore } from '../stores/useFakeSearchStore';
+import { useFakeSearchStore } from "../stores/useFakeSearchStore";
 
 export default function SearchPanel() {
-  console.log("SearchPanel 已掛載");
-
   const categoryOptions = [
     { value: "tech", label: "技術" },
     { value: "policy", label: "政策" },
@@ -20,11 +16,17 @@ export default function SearchPanel() {
   const [sourceOptions, setSourceOptions] = useState<any[]>([]);
   const [source, setSource] = useState<any[]>([]);
   const [query, setQuery] = useState("");
-  const [limit, setLimit] = useState("");
-  const [dateRange, setDateRange] = useState<[Date, Date]>([
-    startOfDay(new Date()),
-    new Date(),
-  ]);
+  const [limit, setLimit] = useState<string>("1");
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
+  // 預設選到當前年份和月份
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
+
+  const [lastUpdatedTime] = useState("2025-06-02 14:00");
 
   const navigate = useNavigate();
   const { addRecord } = useFakeSearchStore();
@@ -47,142 +49,170 @@ export default function SearchPanel() {
     }
   }, []);
 
-  const handleSearch = async () => {
-    const formattedCategory = category.map((c: any) => c.value);
-    const formattedSource = source.map((s: any) => s.value);
-    const [startDate, endDate] = dateRange;
-  
-    const payload = {
-      keyword: query,
-      category: formattedCategory.join(","),
-      source: formattedSource[0] || "",
-      dateRange: `${startDate.toISOString().split("T")[0]} ~ ${endDate.toISOString().split("T")[0]}`,
-      limit: Number(limit),
-      conversation: "",
-    };
-  
-    console.log("✅ 模擬查詢送出：", payload);
-  
-    const fakeId = `fake_${Math.random().toString(36).substring(2, 10)}`;
-  
-    addRecord({
-      id: fakeId,
-      query: payload.keyword,
-      category: payload.category,
-      source: payload.source,
-      startDate: startDate.toISOString().split("T")[0],
-      endDate: endDate.toISOString().split("T")[0],
-      limit: String(payload.limit),
-    });
-  
-    window.dispatchEvent(new Event("refresh-history"));
-    console.log("模擬查詢成功，跳轉至：", `/history/${fakeId}`);
-    navigate(`/history/${fakeId}`);
+  const yearOptions = Array.from({ length: 5 }, (_, i) => {
+    const year = currentYear - i;
+    return { value: year, label: `${year}年` };
+  });
+
+  const maxMonth = selectedYear === currentYear ? currentMonth : 12;
+  const monthOptions = Array.from({ length: maxMonth }, (_, i) => {
+    const month = i + 1;
+    return { value: month, label: `${month}月` };
+  });
+
+  useEffect(() => {
+    if (selectedMonth > maxMonth) {
+      setSelectedMonth(maxMonth);
+    }
+  }, [selectedYear]);
+
+  const startMonth = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+
+  const handleSearch = () => {
+    setAnimating(true);
+
+    setTimeout(() => {
+      const formattedCategory = category.map((c: any) => c.value);
+      const formattedSource = source.map((s: any) => s.value);
+      const safeLimit = Math.min(Math.max(Number(limit), 1), 10);
+
+      const payload = {
+        keyword: query,
+        category: formattedCategory.join(","),
+        source: formattedSource.join(", "),
+        startDate: startMonth,
+        limit: safeLimit,
+        conversation: "",
+      };
+
+      console.log("模擬查詢送出：", payload);
+
+      const fakeId = `${Math.random().toString(36).substring(2, 10)}`;
+
+      addRecord({
+        id: fakeId,
+        query: payload.keyword,
+        category: payload.category,
+        source: payload.source,
+        startDate: startMonth,
+        keyword: payload.keyword,
+        limit: String(safeLimit),
+      });
+
+      window.dispatchEvent(new Event("refresh-history"));
+      navigate(`/history/${fakeId}`);
+    }, 300);
   };
 
-  const today = new Date();
-  const quickRanges = [
-    {
-      label: "今天",
-      value: [startOfDay(today), today] as [Date, Date],
-      closeOverlay: true
-    },
-    {
-      label: "最近 7 天",
-      value: [subDays(today, 6), today] as [Date, Date],
-      closeOverlay: true
-    },
-    {
-      label: "最近 30 天",
-      value: [subDays(today, 29), today] as [Date, Date],
-      closeOverlay: true
-    },
-    {
-      label: "本月",
-      value: [startOfMonth(today), today] as [Date, Date],
-      closeOverlay: true
-    },
-  ];
+  const [animating, setAnimating] = useState(false);
 
   return (
-    <div className="search-panel-wrapper">
-      <div className="search-panel-container">
-        <div className="search-panel-grid">
-          {/* 類別 */}
-          <div className="input-group">
-            <Select
-              options={categoryOptions}
-              value={category}
-              onChange={(val) => setCategory([...(val || [])])}
-              placeholder="選擇類別"
-              isMulti
-              isClearable
-            />
-          </div>
+    <div>
+      {/* 最後爬蟲時間 */}
+      <div className="last-updated-time">最後爬蟲時間：{lastUpdatedTime}</div>
 
-          {/* 來源 */}
-          <div className="input-group">
-            <Select
-              options={sourceOptions}
-              value={source}
-              onChange={(val) => setSource([...(val || [])])}
-              placeholder="選擇來源"
-              isMulti
-              isClearable
-            />
-          </div>
+      <div className="search-panel-wrapper">
+        <div
+          className={`search-panel-container ${animating ? "fade-out" : ""}`}
+        >
+          <div className="search-panel-grid">
+            {/* 類別 */}
+            <div className="input-group">
+              <Select
+                options={categoryOptions}
+                value={category}
+                onChange={(val) => setCategory([...(val || [])])}
+                placeholder="選擇類別"
+                isMulti
+                isClearable
+              />
+            </div>
 
-          {/* 日期 */}
-          <div className="input-group">
-            <DateRangePicker
-              value={dateRange}
-              onChange={(range) => range && setDateRange(range as [Date, Date])}
-              format="yyyy/MM/dd"
-              placeholder="選擇日期區間"
-              oneTap={false}
-              style={{ width: "100%" }}
-              locale={zhTW.DateRangePicker}
-              ranges={quickRanges}
-            />
-          </div>
+            {/* 來源 */}
+            <div className="input-group">
+              <Select
+                options={sourceOptions}
+                value={source}
+                onChange={(val) => setSource([...(val || [])])}
+                placeholder="選擇來源"
+                isMulti
+                isClearable
+              />
+            </div>
 
-          {/* 關鍵字 */}
-          <div className="input-group">
-            <input
-              type="text"
-              className="search-input"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="請輸入關鍵字"
-            />
-          </div>
 
-          {/* 筆數 */}
-          <div className="input-group">
-            <input
-              type="number"
-              className="search-input"
-              value={limit}
-              onChange={(e) => setLimit(e.target.value)}
-              placeholder="輸入要顯示的筆數"
-              min={1}
-            />
-          </div>
+            {/* 開始月份（年份+月份） */}
+            <div className="input-group">
+              <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                {/* 年份 */}
+                <SemiSelect
+                  placeholder="年份"
+                  style={{ flex: 1 }}
+                  value={selectedYear}
+                  onChange={(value) => setSelectedYear(value as number)}
+                >
+                  {yearOptions.map((option) => (
+                    <SemiSelect.Option key={option.value} value={option.value}>
+                      {option.label}
+                    </SemiSelect.Option>
+                  ))}
+                </SemiSelect>
 
-          {/* 查詢按鈕 */}
-          <div
-            className="input-group"
-            style={{ display: "flex", justifyContent: "center" }}
-          >
-            <button
-              className="search-button"
-              onClick={() => {
-                console.log("🖱 按下查詢按鈕");
-                handleSearch();
-              }}
-            >
-              查詢
-            </button>
+                {/* 月份 */}
+                <SemiSelect
+                  placeholder="月份"
+                  style={{ flex: 1 }}
+                  value={selectedMonth}
+                  onChange={(value) => setSelectedMonth(value as number)}
+                >
+                  {monthOptions.map((option) => (
+                    <SemiSelect.Option key={option.value} value={option.value}>
+                      {option.label}
+                    </SemiSelect.Option>
+                  ))}
+                </SemiSelect>
+              </div>
+            </div>
+
+            {/* 關鍵字 */}
+            <div className="input-group">
+              <input
+                type="text"
+                className="search-input"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="請輸入關鍵字"
+              />
+            </div>
+
+            {/* 筆數 */}
+            <div className="input-group">
+              <input
+                type="number"
+                className="search-input"
+                value={limit}
+                onChange={(e) => setLimit(e.target.value)}
+                onBlur={() => {
+                  const numericValue = Number(limit);
+                  if (isNaN(numericValue) || numericValue < 1) {
+                    setLimit("1");
+                  } else if (numericValue > 10) {
+                    alert("最多只能輸入 10 筆");
+                    setLimit("10");
+                  }
+                }}
+                placeholder="輸入要的新聞筆數"
+                min={1}
+                max={10}
+              />
+            </div>
+
+            {/* 查詢按鈕 */}
+            <div className="search-button-wrapper">
+              <button className="search-button" onClick={handleSearch}>
+                查詢
+              </button>
+            </div>
           </div>
         </div>
       </div>

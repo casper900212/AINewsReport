@@ -7,52 +7,49 @@ import ResultPage from './components/ResultPage';
 import SubscriptionPage from './pages/SubscriptionPage';
 import ProductionPage from './pages/ProductionPage';
 
-
 function App() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      {/* ✅ Sidebar 區塊 */}
+    <div style={{ display: 'flex', height: '100vh', position: 'relative' }}>
+      {/* Sidebar 區塊 */}
       <div
         style={{
           width: collapsed ? 0 : 240,
           transition: 'width 0.3s',
           overflow: 'hidden',
           flexShrink: 0,
+          background: '#f9f9f9',
         }}
       >
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(true)} />
       </div>
 
-      {/* ✅ 主內容區 */}
-      <div style={{ flex: 1, position: 'relative' }}>
-        {collapsed && (
-          <button
-            onClick={() => setCollapsed(false)}
-            style={{
-              position: 'absolute',
-              top: '1rem',
-              left: 0,
-              padding: '0.5rem',
-              borderRadius: '8px',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <FaAngleRight size={20} />
-          </button>
-        )}
+      {/* 展開 Sidebar 按鈕 */}
+      {collapsed && (
+        <button
+          onClick={() => setCollapsed(false)}
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            left: '0.5rem',
+            zIndex: 1000,
+            background: 'transparent',
+            cursor: 'pointer',
+          }}
+        >
+          <FaAngleRight size={20} />
+        </button>
+      )}
 
-        <div>
-          <Routes>
-            <Route path="/" element={<SearchPanel />} />
-            <Route path="/history/:historyId" element={<ResultPage />} />
-            <Route path="/subscriptions" element={<SubscriptionPage />} />
-            <Route path="/produce/:id" element={<ProductionPage />} />
-            </Routes>
-        </div>
+      {/* 主內容區 */}
+      <div style={{ flex: 1 }}>
+        <Routes>
+          <Route path="/" element={<SearchPanel />} />
+          <Route path="/history/:historyId" element={<ResultPage />} />
+          <Route path="/subscriptions" element={<SubscriptionPage />} />
+          <Route path="/produce/:id" element={<ProductionPage />} />
+        </Routes>
       </div>
     </div>
   );
