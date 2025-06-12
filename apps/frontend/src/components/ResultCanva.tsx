@@ -9,7 +9,6 @@ interface ResultCanvaProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   addProductionRecord: (record: any) => void; 
-
 }
 
 export default function ResultCanva({
