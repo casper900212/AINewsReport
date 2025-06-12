@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { MdCancel } from "react-icons/md";
 import jsPDF from "jspdf";
 import "../fonts/NotoSansTC";
@@ -5,7 +6,6 @@ import "../fonts/NotoSansTC";
 interface ResultCanvaProps {
   record: any;
   currentPrompt?: string;
-  addProductionRecord?: (record: any) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
 }
@@ -13,37 +13,70 @@ interface ResultCanvaProps {
 export default function ResultCanva({
   record,
   currentPrompt,
-  addProductionRecord,
   onToggleCollapse,
 }: ResultCanvaProps) {
+  const [lastUpdatedTime, setLastUpdatedTime] = useState<string>("");
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/v1/vdb-update/latest", {
+      headers: { Accept: "application/json" },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const updatedAt = data?.data?.updatedAt;
+        if (updatedAt) {
+          const formatted = new Date(updatedAt).toLocaleString("zh-TW", {
+            timeZone: "Asia/Taipei",
+            hour12: false,
+          });
+          setLastUpdatedTime(formatted);
+        } else {
+          setLastUpdatedTime("尚無更新紀錄");
+        }
+      })
+      .catch((err) => {
+        console.error("取得最後更新時間失敗：", err);
+        setLastUpdatedTime("載入失敗");
+      });
+  }, []);
+
   const handleExport = () => {
     if (!record) return;
+
+    const id = record.id || Math.random().toString(36).substring(2, 10);
+    const newRecord = {
+      ...record,
+      id,
+      createdAt: new Date().toISOString(),
+    };
+
+    // 儲存到 localStorage
+    const old = JSON.parse(localStorage.getItem("productionRecords") || "[]");
+    const updated = [newRecord, ...old.filter((r: any) => r.id !== id)];
+    localStorage.setItem("productionRecords", JSON.stringify(updated));
+
+    // 匯出 PDF
     const doc = new jsPDF();
     doc.setFont("NotoSansTC");
     doc.setFontSize(16);
     doc.text("查詢結果報告", 20, 20);
+
     let y = 35;
     const infoList = [
-      ["關鍵字", record.keyword],
-      ["類別", record.category],
-      ["來源", record.source],
-      [
-        "查詢區間",record.startDate,
-      ],
-      ["筆數", record.limit?.toString()],
+      ["關鍵字", newRecord.keyword],
+      ["類別", newRecord.category],
+      ["來源", newRecord.source],
+      ["查詢區間", newRecord.startDate],
+      ["筆數", newRecord.limit?.toString()],
       ...(currentPrompt ? [["使用者 Prompt", currentPrompt]] : []),
+      ["最後爬蟲時間", lastUpdatedTime || "尚無資料"],
     ];
     infoList.forEach(([label, value]) => {
       doc.text(`${label}：${value}`, 20, y);
       y += 10;
     });
+
     doc.save("search_result.pdf");
-    if (addProductionRecord) {
-      addProductionRecord({
-        ...record,
-        createdAt: new Date().toISOString(),
-      });
-    }
   };
 
   return (
@@ -85,6 +118,7 @@ export default function ResultCanva({
           匯出
         </button>
       </div>
+
       <div style={{ padding: "1rem" }}>
         {"keyword" in record && (
           <p>
@@ -106,15 +140,15 @@ export default function ResultCanva({
             <strong>日期區間：</strong> {record.startDate}
           </p>
         )}
-
         {"limit" in record && (
           <p>
             <strong>筆數：</strong> {record.limit}
           </p>
         )}
       </div>
+
       <div className="updated-time" style={{ padding: "0 1rem 1rem" }}>
-        最後爬蟲時間：2025-06-02 14:00
+        最後爬蟲時間：{lastUpdatedTime}
       </div>
     </div>
   );

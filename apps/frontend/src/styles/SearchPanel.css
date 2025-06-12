@@ -44,7 +44,7 @@
 
 .input-group {
   width: 240px;
-  
+  background-color:transparent
 }
 
 .search-input {
@@ -86,4 +86,11 @@
   font-size: 0.85rem;
   color: #666;
   margin-top: 0.2rem;
+}
+.input-error .react-select__control {
+  border: 1px solid red !important;
+}
+
+.input-error input {
+  border: 1px solid red !important;
 }

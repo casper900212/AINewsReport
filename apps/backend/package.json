@@ -22,18 +22,21 @@
     "@types/node": "^22.15.30",
     "@types/swagger-ui-express": "^4.1.8",
     "ericlint": "^1.1.17",
+    "nodemon": "^2.0.20",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
-    "nodemon": "^2.0.20"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@tsoa/runtime": "^6.6.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "pg": "^8.8.0",
+    "reflect-metadata": "^0.2.2",
     "swagger-ui-express": "^5.0.1",
     "tsoa": "^6.6.0",
     "typeorm": "^0.3.24",
-    "winston": "^3.17.0",
-    "pg": "^8.8.0"
+    "winston": "^3.17.0"
   },
   "nodemonConfig": {
     "watch": [
