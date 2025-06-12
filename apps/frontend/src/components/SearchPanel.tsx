@@ -9,7 +9,7 @@ export default function SearchPanel() {
   const categoryOptions = [
     { value: "tech", label: "技術" },
     { value: "policy", label: "政策" },
-    { value: "news", label: "新聞" },
+    { value: "law", label: "法規" },
   ];
 
   const [category, setCategory] = useState<any[]>([]);
