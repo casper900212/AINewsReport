@@ -8,6 +8,8 @@ interface ResultCanvaProps {
   currentPrompt?: string;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  addProductionRecord: (record: any) => void; 
+
 }
 
 export default function ResultCanva({
