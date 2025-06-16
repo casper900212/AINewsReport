@@ -46,7 +46,7 @@ function App() {
       <div style={{ flex: 1 }}>
         <Routes>
           <Route path="/" element={<SearchPanel />} />
-          <Route path="/history/:historyId" element={<ResultPage />} />
+          <Route path="/conversations/:conversationId" element={<ResultPage />} />
           <Route path="/subscriptions" element={<SubscriptionPage />} />
           <Route path="/produce/:id" element={<ProductionPage />} />
         </Routes>

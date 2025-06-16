@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import '../styles/SubscriptionPage.css';
 
 type Source = {
-  id: number; // ✅ 統一為 number
+  id: number;
   value: string;
   label: string;
   enabled: boolean;

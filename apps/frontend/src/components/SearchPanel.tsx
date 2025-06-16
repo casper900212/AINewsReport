@@ -3,7 +3,6 @@ import Select from "react-select";
 import { Select as SemiSelect } from "@douyinfe/semi-ui";
 import "../styles/SearchPanel.css";
 import { useNavigate } from "react-router-dom";
-import { useFakeSearchStore } from "../stores/useFakeSearchStore";
 
 export default function SearchPanel() {
   const categoryOptions = [
@@ -50,7 +49,6 @@ export default function SearchPanel() {
   }, []);
   
   const navigate = useNavigate();
-  const { addRecord } = useFakeSearchStore();
 
   useEffect(() => {
     fetch("http://localhost:3000/api/v1/crawler", {
@@ -89,51 +87,56 @@ export default function SearchPanel() {
 
   const startMonth = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const isSourceEmpty = source.length === 0;
     const numericLimit = Number(limit);
     const isLimitInvalid = !limit || isNaN(numericLimit) || numericLimit < 1 || numericLimit > 10;
-
-
+  
     setSourceError(isSourceEmpty);
     setLimitError(isLimitInvalid);
-
+  
     if (isSourceEmpty || isLimitInvalid) return;
-
+  
     setAnimating(true);
-
-    setTimeout(() => {
+  
+    try {
       const formattedCategory = category.map((c: any) => c.value);
-      const formattedSource = source.map((s: any) => s.value);
-      const safeLimit = Math.min(Math.max(numericLimit, 1), 10);
-
-      const payload = {
-        keyword: query,
-        category: formattedCategory.join(","),
-        source: formattedSource.join(", "),
-        startDate: startMonth,
-        limit: safeLimit,
-        conversation: "",
-      };
-
-      console.log("模擬查詢送出：", payload);
-
-      const fakeId = `${Math.random().toString(36).substring(2, 10)}`;
-
-      addRecord({
-        id: fakeId,
-        query: payload.keyword,
-        category: payload.category,
-        source: payload.source,
-        startDate: startMonth,
-        keyword: payload.keyword,
-        limit: String(safeLimit),
+      const formattedSource = source.map((s: any) => s.value); 
+  
+      const response = await fetch("http://localhost:3000/api/v1/conversations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          filters: {
+            industry: formattedCategory[0] || undefined,
+            keywords: query ? query.split(/\s+/) : [],
+            source: formattedSource,
+            dateRange: [startMonth],
+          },
+        }),
       });
-
-      window.dispatchEvent(new Event("refresh-history"));
-      navigate(`/history/${fakeId}`);
-    }, 300);
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data?.error || "建立對話失敗");
+      }
+  
+      const conversationId = data.data.id;
+  
+      // 可選：儲存 local store、加進歷史紀錄等
+      navigate(`/conversations/${conversationId}`);
+    } catch (err) {
+      console.error("查詢失敗：", err);
+      alert("建立對話失敗，請稍後再試");
+    } finally {
+      setAnimating(false);
+    }
   };
+  
 
   const [animating, setAnimating] = useState(false);
 
