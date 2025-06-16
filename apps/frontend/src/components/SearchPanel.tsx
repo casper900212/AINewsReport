@@ -9,13 +9,13 @@ export default function SearchPanel({
 }: {
   onSearchComplete?: () => void;
 }) {
-  const categoryOptions = [
-    { value: "tech", label: "技術" },
-    { value: "policy", label: "政策" },
-    { value: "law", label: "法規" },
+  const industryOptions = [
+    { value: "資安", label: "資安" },
+    { value: "人工智慧", label: "人工智慧" },
+    { value: "區塊鏈", label: "區塊鏈" },
   ];
 
-  const [category, setCategory] = useState<any[]>([]);
+  const [industry, setindustry] = useState<any[]>([]);
   const [sourceOptions, setSourceOptions] = useState<any[]>([]);
   const [source, setSource] = useState<any[]>([]);
   const [query, setQuery] = useState("");
@@ -104,7 +104,7 @@ export default function SearchPanel({
     setAnimating(true);
 
     try {
-      const formattedCategory = category.map((c: any) => c.value);
+      const formattedindustry = industry.map((c: any) => c.value);
       const formattedSource = source.map((s: any) => s.value);
 
       const response = await fetch("http://localhost:3000/api/v1/conversations", {
@@ -115,7 +115,7 @@ export default function SearchPanel({
         },
         body: JSON.stringify({
           filters: {
-            industry: formattedCategory[0] || undefined,
+            industry: formattedindustry[0] || undefined,
             keywords: query ? query.split(/\s+/) : [],
             source: formattedSource,
             dateRange: [startMonth],
@@ -129,9 +129,8 @@ export default function SearchPanel({
         throw new Error(data?.error || "建立對話失敗");
       }
 
-      const conversationId = data.data.id;
+      const conversationId = data.data.conversationId;
 
-      // ✅ 成功建立對話後通知外部刷新歷史紀錄
       if (onSearchComplete) {
         onSearchComplete();
       }
@@ -154,9 +153,9 @@ export default function SearchPanel({
           <div className="search-panel-grid">
             <div className="input-group">
               <Select
-                options={categoryOptions}
-                value={category}
-                onChange={(val) => setCategory([...(val || [])])}
+                options={industryOptions}
+                value={industry}
+                onChange={(val) => setindustry([...(val || [])])}
                 placeholder="選擇類別"
                 isMulti
                 isClearable

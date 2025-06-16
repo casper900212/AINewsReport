@@ -65,7 +65,7 @@ export default function ResultCanva({
     let y = 35;
     const infoList = [
       ["關鍵字", newRecord.keyword],
-      ["類別", newRecord.category],
+      ["類別", newRecord.industry],
       ["來源", newRecord.source],
       ["查詢區間", newRecord.startDate],
       ["筆數", newRecord.limit?.toString()],
@@ -126,9 +126,9 @@ export default function ResultCanva({
             <strong>關鍵字：</strong> {record.keyword}
           </p>
         )}
-        {"category" in record && (
+        {"industry" in record && (
           <p>
-            <strong>類別：</strong> {record.category}
+            <strong>類別：</strong> {record.industry}
           </p>
         )}
         {"source" in record && (
