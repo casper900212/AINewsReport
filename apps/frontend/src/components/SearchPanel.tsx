@@ -32,6 +32,7 @@ export default function SearchPanel({
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
 
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function SearchPanel({
   }, []);
 
   useEffect(() => {
+
     fetch("http://localhost:3000/api/v1/crawler", {
       headers: { Accept: "application/json" },
     })
@@ -92,10 +94,10 @@ export default function SearchPanel({
   const startMonth = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
 
   const handleSearch = async () => {
+
     const isSourceEmpty = source.length === 0;
     const numericLimit = Number(limit);
     const isLimitInvalid = !limit || isNaN(numericLimit) || numericLimit < 1 || numericLimit > 10;
-
     setSourceError(isSourceEmpty);
     setLimitError(isLimitInvalid);
 
@@ -225,6 +227,7 @@ export default function SearchPanel({
                 onChange={(e) => {
                   setLimit(e.target.value);
                   setLimitError(false);
+
                 }}
                 onBlur={() => {
                   const numericValue = Number(limit);
@@ -241,7 +244,6 @@ export default function SearchPanel({
                 max={10}
               />
             </div>
-
             <div className="search-button-wrapper">
               <button className="search-button" onClick={handleSearch}>
                 查詢

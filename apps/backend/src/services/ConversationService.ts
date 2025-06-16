@@ -1,5 +1,5 @@
 import { ConversationRepository } from '../repository/ConversationRepository'
-import Conversation from '../db/entity/ConversationEntity'
+import { Conversation } from '../db/entity/ConversationEntity'
 import { MessageRepository } from '../repository/MessageRepository'
 
 const conversationRepository = new ConversationRepository()
@@ -9,6 +9,7 @@ function generateTitle(filters: Conversation['filters']): string {
   const { dateRange, keywords, industry, source } = filters ?? {}
 
   const rawDate = Array.isArray(dateRange) && dateRange.length > 0 ? dateRange[0] : ''
+
   const date = /^\d{4}-\d{2}$/.test(rawDate)
     ? rawDate.replace('-', '年') + '月'
     : ''
@@ -22,58 +23,39 @@ function generateTitle(filters: Conversation['filters']): string {
 
 export const createConversation = async (
   filters: Conversation['filters']
-): Promise<{
-  conversationId: number
-  title: string
-  createdAt: Date
-  message: string
-  response: string
-}> => {
+): Promise<Conversation> => {
   const title = generateTitle(filters)
-  const conversation = await conversationRepository.createConversation(title, filters)
-
-  // ❗ 直接把查詢條件轉成 JSON string
-  const userMessage = `查詢條件：\n${JSON.stringify(filters, null, 2)}`
-  await messageRepository.saveMessage(conversation.id, 'user', userMessage)
-
-  const ragResponse = await callPythonRagService(userMessage)
-  await messageRepository.saveMessage(conversation.id, 'assistant', ragResponse)
-
-  return {
-    conversationId: conversation.id,
-    title: conversation.title,
-    createdAt: conversation.created_at,
-    message: userMessage,
-    response: ragResponse,
-  }
+  return await conversationRepository.createConversation(title, filters)
 }
 
-
 export const getAllConversations = async (): Promise<
-  { id: number; title: string; createdAt: Date }[]
+  { id: string; title: string; createdAt: Date }[]
 > => {
   const conversations = await conversationRepository.findAll()
-  return conversations.map(({ id, title, created_at }) => ({
+  return conversations.map(({ id, title, createdAt }) => ({
     id,
     title,
-    createdAt: created_at,
+    createdAt,
   }))
 }
 
 export const getConversationById = async (
-  id: number
+  id: string
 ): Promise<Conversation | null> => {
   return conversationRepository.findById(id)
 }
 
 export const handleMessageInConversation = async (
-  conversationId: number,
+  conversationId: string,
   message: string
-): Promise<{ conversationId: number; message: string; response: string }> => {
+): Promise<{ conversationId: string; message: string; response: string }> => {
+  // 儲存使用者訊息
   await messageRepository.saveMessage(conversationId, 'user', message)
 
+  // 呼叫 RAG 模型
   const ragResponse = await callPythonRagService(message)
 
+  // 儲存 assistant 回覆
   await messageRepository.saveMessage(conversationId, 'assistant', ragResponse)
 
   return {
@@ -84,9 +66,9 @@ export const handleMessageInConversation = async (
 }
 
 export const getConversationDetail = async (
-  id: number
+  id: string
 ): Promise<{
-  id: number
+  id: string
   title: string
   messages: { role: 'user' | 'assistant'; content: string }[]
 }> => {
@@ -105,18 +87,17 @@ export const getConversationDetail = async (
   }
 }
 
-export const deleteConversation = async (id: number): Promise<boolean> => {
-  const conversation = await conversationRepository.findById(id)
-  if (!conversation) return false
-
-  await messageRepository.softDeleteByConversation(id)
-  await conversationRepository.softDeleteById(id)
-
-  return true
-}
-
-
 const callPythonRagService = async (query: string): Promise<string> => {
   // TODO: 換成實際 HTTP 請求
   return `接RAG的回答`
+}
+
+export const deleteConversation = async (id: string): Promise<boolean> => {
+  const conversation = await conversationRepository.findById(id)
+  if (!conversation) return false
+
+  await messageRepository.deleteByConversation(id)
+  await conversationRepository.deleteById(id)
+
+  return true
 }

@@ -1,6 +1,6 @@
 import { appDataSource } from '../utils/dbHelper'
+import { Conversation } from '../db/entity/ConversationEntity'
 import { Repository } from 'typeorm'
-import Conversation from '../db/entity/ConversationEntity'
 
 export class ConversationRepository {
   private repo: Repository<Conversation>
@@ -19,15 +19,15 @@ export class ConversationRepository {
 
   async findAll(): Promise<Conversation[]> {
     return await this.repo.find({
-      order: { created_at: 'DESC' }, 
+      order: { createdAt: 'DESC' },
     })
   }
 
-  async findById(id: number): Promise<Conversation | null> {
+  async findById(id: string): Promise<Conversation | null> {
     return await this.repo.findOneBy({ id })
   }
 
-  async softDeleteById(id: number): Promise<void> {
-    await this.repo.softDelete({ id })
+  async deleteById(id: string): Promise<void> {
+    await this.repo.delete({ id })
   }
 }

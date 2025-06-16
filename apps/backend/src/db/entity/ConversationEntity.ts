@@ -1,20 +1,30 @@
 import {
   Entity,
+  PrimaryGeneratedColumn,
   Column,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm'
-import Base from './Base'
 
-@Entity('conversation') 
-export default class Conversation extends Base {
+@Entity()
+export class Conversation {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string
 
   @Column()
   title!: string
 
   @Column('jsonb', { nullable: true })
-  filters?: {
+  filters!: {
     industry?: string
     keywords?: string[]
     source?: string[]
     dateRange?: string[]
   }
+
+  @CreateDateColumn()
+  createdAt!: Date
+
+  @UpdateDateColumn()
+  updatedAt!: Date
 }

@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Path,
-  Post,
-  Response,
-  Route,
-  Tags,
-  Delete,
-} from "tsoa";
+import { Body, Controller, Get, Path, Post, Response, Route, Tags, Delete} from "tsoa";
 import { sendOk } from "../utils/routeHelper";
 import {
   createConversation,
@@ -28,15 +18,13 @@ interface CreateConversationRequest {
 }
 
 interface CreateConversationResponse {
-  conversationId: number;
+  id: string;
   title: string;
   createdAt: Date;
-  message: string;
-  response: string;
 }
 
 interface ConversationSummary {
-  id: number;
+  id: string;
   title: string;
   createdAt: Date;
 }
@@ -46,13 +34,13 @@ interface PostMessageRequest {
 }
 
 interface PostMessageResponse {
-  conversationId: number;
+  conversationId: string;
   message: string;
   response: string;
 }
 
 interface GetConversationResponse {
-  id: number;
+  id: string;
   title: string;
   messages: {
     role: "user" | "assistant";
@@ -64,7 +52,7 @@ interface GetConversationResponse {
 @Route("conversations")
 export class ConversationController extends Controller {
   /**
-   * @summary 建立新的對話（並馬上回應 RAG 結果）
+   * @summary 建立新的對話（根據 filters 自動產生標題）
    */
   @Post("/")
   @Response<CreateConversationResponse>(200)
@@ -78,10 +66,19 @@ export class ConversationController extends Controller {
       return { data: null as any };
     }
 
-    const result = await createConversation(requestBody.filters);
-    return sendOk({ data: result });
+    const conversation = await createConversation(requestBody.filters);
+    return sendOk({
+      data: {
+        id: conversation.id,
+        title: conversation.title,
+        createdAt: conversation.createdAt,
+      },
+    });
   }
 
+  /**
+   * @summary 取得所有對話列表
+   */
   @Get("/")
   @Response<ConversationSummary[]>(200)
   public async getConversations(): Promise<{ data: ConversationSummary[] }> {
@@ -89,18 +86,24 @@ export class ConversationController extends Controller {
     return sendOk({ data: conversations });
   }
 
+  /**
+   * @summary 在對話中新增訊息並回傳 RAG 回應
+   */
   @Post("{id}")
   public async postMessageToConversation(
-    @Path() id: number,
+    @Path() id: string,
     @Body() body: PostMessageRequest
   ): Promise<{ data: PostMessageResponse }> {
     const result = await handleMessageInConversation(id, body.message);
     return sendOk({ data: result });
   }
 
+  /**
+   * @summary 根據 ID 取得完整對話（含訊息）
+   */
   @Get("{id}")
   public async getConversationDetail(
-    @Path() id: number
+    @Path() id: string
   ): Promise<{ data: GetConversationResponse }> {
     const result = await getConversationDetail(id);
     return sendOk({ data: result });
@@ -110,7 +113,7 @@ export class ConversationController extends Controller {
   @Response<{ message: string }>(200)
   @Response<{ error: string }>(404, "Conversation not found")
   public async deleteConversation(
-    @Path() id: number
+    @Path() id: string
   ): Promise<{ message: string }> {
     const success = await deleteConversation(id);
     if (!success) {
