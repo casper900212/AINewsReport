@@ -24,4 +24,8 @@ export class MessageRepository {
       order: { createdAt: 'ASC' },
     })
   }
+
+  async deleteByConversation(conversationId: string): Promise<void> {
+    await this.repo.delete({ conversationId })
+  }
 }

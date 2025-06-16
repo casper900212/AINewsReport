@@ -18,7 +18,7 @@ function generateTitle(filters: Conversation['filters']): string {
   const industryPart = industry ?? ''
   const sourcePart = source?.join('、') ?? ''
 
-  return `${date}${keywordPart && keywordPart + '與'}${industryPart}${sourcePart && '・' + sourcePart}新聞摘要`
+  return `${date}${keywordPart && keywordPart + '、'}${industryPart}${sourcePart && '' + sourcePart}新聞摘要`
 }
 
 export const createConversation = async (
@@ -90,4 +90,14 @@ export const getConversationDetail = async (
 const callPythonRagService = async (query: string): Promise<string> => {
   // TODO: 換成實際 HTTP 請求
   return `接RAG的回答`
+}
+
+export const deleteConversation = async (id: string): Promise<boolean> => {
+  const conversation = await conversationRepository.findById(id)
+  if (!conversation) return false
+
+  await messageRepository.deleteByConversation(id)
+  await conversationRepository.deleteById(id)
+
+  return true
 }
