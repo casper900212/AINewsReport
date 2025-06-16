@@ -11,7 +11,10 @@
     "build-route": "tsoa routes --basePath /api/v1",
     "build-swagger": "tsoa spec --basePath /api/v1",
     "eslint": "eslint -c .eslintrc \"./**/*.ts\"",
-    "eslint:fix": "eslint --fix \"./src/*.ts\""
+    "eslint:fix": "eslint --fix \"./src/*.ts\"",
+    "typeorm": "typeorm-ts-node-commonjs -d src/utils/dbHelper.ts",
+    "typeorm:drop": "npm run typeorm schema:drop",
+    "typeorm:sync": "npm run typeorm schema:sync"
   },
   "keywords": [],
   "author": "",

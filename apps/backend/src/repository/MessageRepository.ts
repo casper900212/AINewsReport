@@ -1,6 +1,7 @@
 import { appDataSource } from '../utils/dbHelper'
 import { Message } from '../db/entity/MessageEntity'
 import { Repository } from 'typeorm'
+import Conversation from '../db/entity/ConversationEntity'
 
 export class MessageRepository {
   private repo: Repository<Message>
@@ -10,22 +11,26 @@ export class MessageRepository {
   }
 
   async saveMessage(
-    conversationId: string,
+    conversationId: number,
     role: 'user' | 'assistant',
     content: string
   ): Promise<Message> {
-    const message = this.repo.create({ conversationId, role, content })
+    const message = this.repo.create({
+      conversation: { id: conversationId } as Conversation,
+      role,
+      content,
+    })
     return this.repo.save(message)
   }
 
-  async findByConversation(conversationId: string): Promise<Message[]> {
+  async findByConversation(conversationId: number): Promise<Message[]> {
     return this.repo.find({
-      where: { conversationId },
-      order: { createdAt: 'ASC' },
+      where: { conversation: { id: conversationId } },
+      order: { created_at: 'ASC' },
     })
   }
 
-  async deleteByConversation(conversationId: string): Promise<void> {
-    await this.repo.delete({ conversationId })
+  async softDeleteByConversation(conversationId: number): Promise<void> {
+    await this.repo.softDelete({ conversation: { id: conversationId } })
   }
 }

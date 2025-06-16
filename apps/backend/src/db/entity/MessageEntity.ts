@@ -1,32 +1,24 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    CreateDateColumn,
-    ManyToOne,
-    JoinColumn,
-  } from 'typeorm'
-  import { Conversation } from './ConversationEntity'
-  
-  @Entity()
-  export class Message {
-    @PrimaryGeneratedColumn('uuid')
-    id!: string
-  
-    @Column()
-    conversationId!: string
-  
-    @ManyToOne(() => Conversation)
-    @JoinColumn({ name: 'conversationId' })
-    conversation!: Conversation
-  
-    @Column()
-    role!: 'user' | 'assistant'
-  
-    @Column('text')
-    content!: string
-  
-    @CreateDateColumn()
-    createdAt!: Date
-  }
-  
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm'
+import Base from './Base'
+import Conversation from './ConversationEntity'
+
+@Entity()
+export class Message extends Base {
+  @Column()
+  conversationId!: number
+
+  @ManyToOne(() => Conversation, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'conversationId' })
+  conversation!: Conversation
+
+  @Column()
+  role!: 'user' | 'assistant'
+
+  @Column('text')
+  content!: string
+}

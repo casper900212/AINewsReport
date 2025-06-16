@@ -8,7 +8,10 @@ interface HistoryPanelProps {
   refreshKey: number;
 }
 
-export default function HistoryPanel({ onSelect, refreshKey }: HistoryPanelProps) {
+export default function HistoryPanel({
+  onSelect,
+  refreshKey,
+}: HistoryPanelProps) {
   const [expanded, setExpanded] = useState(false);
   const [allRecords, setAllRecords] = useState<any[]>([]);
   const navigate = useNavigate();
@@ -46,10 +49,13 @@ export default function HistoryPanel({ onSelect, refreshKey }: HistoryPanelProps
     if (!window.confirm("確定要刪除這筆紀錄嗎？")) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/conversations/${id}`, {
-        method: "DELETE",
-        headers: { Accept: "application/json" },
-      });
+      const res = await fetch(
+        `http://localhost:3000/api/v1/conversations/${id}`,
+        {
+          method: "DELETE",
+          headers: { Accept: "application/json" },
+        }
+      );
 
       if (!res.ok) {
         throw new Error("刪除失敗");
@@ -59,7 +65,7 @@ export default function HistoryPanel({ onSelect, refreshKey }: HistoryPanelProps
 
       const match = location.pathname.match(/^\/conversations\/([^/]+)$/);
       const currentId = match?.[1];
-      if (currentId === id) {
+      if (currentId === String(id)) {
         navigate("/");
       }
     } catch (err) {
@@ -92,8 +98,13 @@ export default function HistoryPanel({ onSelect, refreshKey }: HistoryPanelProps
           ) : (
             allRecords.map((record) => (
               <div key={record.id} className="sidebar-subitem-wrapper">
-                <button className="sidebar-subitem" onClick={() => handleClick(record.id)}>
-                  <div className="item-info">{record.title || "未命名查詢"}</div>
+                <button
+                  className="sidebar-subitem"
+                  onClick={() => handleClick(record.id)}
+                >
+                  <div className="item-info">
+                    {record.title || "未命名查詢"}
+                  </div>
                 </button>
                 <button
                   className="sidebar-delete-button"
