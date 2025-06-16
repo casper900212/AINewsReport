@@ -1,17 +1,39 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/Sidebar.css";
 import { MdDelete } from "react-icons/md";
 
-export default function HistoryPanel({
-  onSelect,
-}: {
+interface HistoryPanelProps {
   onSelect: (item: string) => void;
-}) {
+  refreshKey: number;
+}
+
+export default function HistoryPanel({ onSelect, refreshKey }: HistoryPanelProps) {
   const [expanded, setExpanded] = useState(false);
   const [allRecords, setAllRecords] = useState<any[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const fetchConversations = useCallback(async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/v1/conversations");
+      const data = await res.json();
+      const sorted = (data.data || []).sort(
+        (a: any, b: any) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setAllRecords(sorted);
+    } catch (err) {
+      console.error("無法取得對話列表", err);
+    }
+  }, []);
+
+  // ✅ 每當 refreshKey 改變且展開狀態為 true，就重新 fetch
+  useEffect(() => {
+    if (expanded) {
+      fetchConversations();
+    }
+  }, [refreshKey, expanded, fetchConversations]);
 
   const handleClick = (id: string) => {
     onSelect(id);
@@ -20,25 +42,23 @@ export default function HistoryPanel({
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-  
+
     if (!window.confirm("確定要刪除這筆紀錄嗎？")) return;
-  
+
     try {
       const res = await fetch(`http://localhost:3000/api/v1/conversations/${id}`, {
         method: "DELETE",
         headers: { Accept: "application/json" },
       });
-  
+
       if (!res.ok) {
         throw new Error("刪除失敗");
       }
-  
-      // 本地移除紀錄
+
       setAllRecords((prev) => prev.filter((r) => r.id !== id));
-  
-      // 若當前頁面是該筆紀錄，跳轉回首頁
-      const currentPathMatch = location.pathname.match(/^\/conversations\/([^/]+)$/);
-      const currentId = currentPathMatch?.[1];
+
+      const match = location.pathname.match(/^\/conversations\/([^/]+)$/);
+      const currentId = match?.[1];
       if (currentId === id) {
         navigate("/");
       }
@@ -47,20 +67,6 @@ export default function HistoryPanel({
       alert("刪除失敗，請稍後再試");
     }
   };
-  
-
-  const fetchConversations = useCallback(async () => {
-    try {
-      const res = await fetch("http://localhost:3000/api/v1/conversations");
-      const data = await res.json();
-      const sorted = (data.data || []).sort(
-        (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      setAllRecords(sorted);
-    } catch (err) {
-      console.error("無法取得對話列表", err);
-    }
-  }, []);
 
   return (
     <div className="history-panel">
@@ -69,7 +75,7 @@ export default function HistoryPanel({
         onClick={() => {
           setExpanded((prev) => {
             const next = !prev;
-            if (!prev) fetchConversations(); // 當從收合 => 展開，觸發 fetch
+            if (!prev) fetchConversations(); // 第一次展開就 fetch
             return next;
           });
         }}
@@ -86,13 +92,8 @@ export default function HistoryPanel({
           ) : (
             allRecords.map((record) => (
               <div key={record.id} className="sidebar-subitem-wrapper">
-                <button
-                  className="sidebar-subitem"
-                  onClick={() => handleClick(record.id)}
-                >
-                  <div className="item-info">
-                    {record.title || "未命名查詢"}
-                  </div>
+                <button className="sidebar-subitem" onClick={() => handleClick(record.id)}>
+                  <div className="item-info">{record.title || "未命名查詢"}</div>
                 </button>
                 <button
                   className="sidebar-delete-button"

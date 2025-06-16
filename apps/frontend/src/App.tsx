@@ -9,10 +9,13 @@ import ProductionPage from './pages/ProductionPage';
 
 function App() {
   const [collapsed, setCollapsed] = useState(false);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+
+  // ✅ 將這個 callback 傳給 SearchPanel
+  const triggerHistoryRefresh = () => setHistoryRefreshKey(prev => prev + 1);
 
   return (
     <div style={{ display: 'flex', height: '100vh', position: 'relative' }}>
-      {/* Sidebar 區塊 */}
       <div
         style={{
           width: collapsed ? 0 : 240,
@@ -22,10 +25,13 @@ function App() {
           background: '#f9f9f9',
         }}
       >
-        <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(true)} />
+        <Sidebar
+          collapsed={collapsed}
+          onToggle={() => setCollapsed(true)}
+          historyRefreshKey={historyRefreshKey} // ✅ 傳進 Sidebar
+        />
       </div>
 
-      {/* 展開 Sidebar 按鈕 */}
       {collapsed && (
         <button
           onClick={() => setCollapsed(false)}
@@ -42,10 +48,10 @@ function App() {
         </button>
       )}
 
-      {/* 主內容區 */}
       <div style={{ flex: 1 }}>
         <Routes>
-          <Route path="/" element={<SearchPanel />} />
+          {/* ✅ 傳 triggerHistoryRefresh 到 SearchPanel */}
+          <Route path="/" element={<SearchPanel onSearchComplete={triggerHistoryRefresh} />} />
           <Route path="/conversations/:conversationId" element={<ResultPage />} />
           <Route path="/subscriptions" element={<SubscriptionPage />} />
           <Route path="/produce/:id" element={<ProductionPage />} />

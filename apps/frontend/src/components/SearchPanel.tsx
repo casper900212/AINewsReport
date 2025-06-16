@@ -4,7 +4,11 @@ import { Select as SemiSelect } from "@douyinfe/semi-ui";
 import "../styles/SearchPanel.css";
 import { useNavigate } from "react-router-dom";
 
-export default function SearchPanel() {
+export default function SearchPanel({
+  onSearchComplete,
+}: {
+  onSearchComplete?: () => void;
+}) {
   const categoryOptions = [
     { value: "tech", label: "技術" },
     { value: "policy", label: "政策" },
@@ -18,6 +22,9 @@ export default function SearchPanel() {
   const [limit, setLimit] = useState<string>("");
   const [sourceError, setSourceError] = useState(false);
   const [limitError, setLimitError] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const [lastUpdatedTime, setLastUpdatedTime] = useState<string>("");
+
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
@@ -25,7 +32,7 @@ export default function SearchPanel() {
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
 
-  const [lastUpdatedTime, setLastUpdatedTime] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://localhost:3000/api/v1/vdb-update/latest", {
@@ -34,7 +41,6 @@ export default function SearchPanel() {
       .then((res) => res.json())
       .then((data) => {
         const updatedAt = data?.data?.updatedAt;
-
         if (updatedAt) {
           const formatted = new Date(updatedAt).toLocaleString("zh-TW", {
             timeZone: "Asia/Taipei",
@@ -47,8 +53,6 @@ export default function SearchPanel() {
         console.error("取得最後更新時間失敗：", err);
       });
   }, []);
-  
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://localhost:3000/api/v1/crawler", {
@@ -91,18 +95,18 @@ export default function SearchPanel() {
     const isSourceEmpty = source.length === 0;
     const numericLimit = Number(limit);
     const isLimitInvalid = !limit || isNaN(numericLimit) || numericLimit < 1 || numericLimit > 10;
-  
+
     setSourceError(isSourceEmpty);
     setLimitError(isLimitInvalid);
-  
+
     if (isSourceEmpty || isLimitInvalid) return;
-  
+
     setAnimating(true);
-  
+
     try {
       const formattedCategory = category.map((c: any) => c.value);
-      const formattedSource = source.map((s: any) => s.value); 
-  
+      const formattedSource = source.map((s: any) => s.value);
+
       const response = await fetch("http://localhost:3000/api/v1/conversations", {
         method: "POST",
         headers: {
@@ -118,16 +122,20 @@ export default function SearchPanel() {
           },
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data?.error || "建立對話失敗");
       }
-  
+
       const conversationId = data.data.id;
-  
-      // 可選：儲存 local store、加進歷史紀錄等
+
+      // ✅ 成功建立對話後通知外部刷新歷史紀錄
+      if (onSearchComplete) {
+        onSearchComplete();
+      }
+
       navigate(`/conversations/${conversationId}`);
     } catch (err) {
       console.error("查詢失敗：", err);
@@ -136,18 +144,13 @@ export default function SearchPanel() {
       setAnimating(false);
     }
   };
-  
-
-  const [animating, setAnimating] = useState(false);
 
   return (
     <div>
       <div className="last-updated-time">最後爬蟲時間：{lastUpdatedTime}</div>
 
       <div className="search-panel-wrapper">
-        <div
-          className={`search-panel-container ${animating ? "fade-out" : ""}`}
-        >
+        <div className={`search-panel-container ${animating ? "fade-out" : ""}`}>
           <div className="search-panel-grid">
             <div className="input-group">
               <Select
@@ -222,7 +225,7 @@ export default function SearchPanel() {
                 value={limit}
                 onChange={(e) => {
                   setLimit(e.target.value);
-                  setLimitError(false); // 清除錯誤狀態
+                  setLimitError(false);
                 }}
                 onBlur={() => {
                   const numericValue = Number(limit);
@@ -239,6 +242,7 @@ export default function SearchPanel() {
                 max={10}
               />
             </div>
+
             <div className="search-button-wrapper">
               <button className="search-button" onClick={handleSearch}>
                 查詢
