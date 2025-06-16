@@ -26,4 +26,8 @@ export class ConversationRepository {
   async findById(id: string): Promise<Conversation | null> {
     return await this.repo.findOneBy({ id })
   }
+
+  async deleteById(id: string): Promise<void> {
+    await this.repo.delete({ id })
+  }
 }

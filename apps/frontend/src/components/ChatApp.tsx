@@ -3,7 +3,8 @@ import PromptInput from './PromptInput';
 import PromptHistory from './PromptHistory';
 
 interface ChatAppProps {
-  historyId: string;
+  conversationId: string;
+  messages: { role: 'user' | 'assistant'; content: string }[];
   onPromptChange?: (prompt: string) => void;
   onReplyChange?: (reply: string) => void;
 }
@@ -13,52 +14,54 @@ interface Message {
   content: string;
 }
 
-export default function ChatApp({ historyId, onPromptChange, onReplyChange }: ChatAppProps) {
+export default function ChatApp({
+  conversationId,
+  messages,
+  onPromptChange,
+  onReplyChange,
+}: ChatAppProps) {
   const [conversation, setConversation] = useState<Message[]>([]);
 
-  // ✅ 載入歷史對話資料
+  // 初始化從 props.messages 載入對話
   useEffect(() => {
-    if (!historyId) return;
-    fetch(`${import.meta.env.VITE_API_BASE}/history/${historyId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data.conversation)) {
-          setConversation(data.conversation);
-        }
-      })
-      .catch((err) => {
-        console.error('載入對話紀錄失敗：', err);
-      });
-  }, [historyId]);
+    const formatted: Message[] = messages.map((msg) => ({
+      role: msg.role === 'assistant' ? 'bot' : 'user',
+      content: msg.content,
+    }));
+    setConversation(formatted);
+  }, [messages]);
 
-  // ✅ 處理使用者輸入
   const handleSubmit = async (message: Message) => {
+    // 加入使用者訊息
     setConversation((prev) => [...prev, message]);
+    onPromptChange?.(message.content);
 
-    if (message.role === 'user') {
+    try {
+      const res = await fetch(`http://localhost:3000/api/v1/conversations/${conversationId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message.content }),
+      });
+
+      if (!res.ok) {
+        throw new Error('後端回應失敗');
+      }
+
+      const data = await res.json();
       const reply: Message = {
         role: 'bot',
-        content: `回覆：「${message.content}」`,
+        content: data.data.response,
       };
 
-      setTimeout(() => {
-        setConversation((prev) => [...prev, reply]);
-
-        onPromptChange?.(message.content);
-        onReplyChange?.(reply.content);
-      }, 500);
-
-      try {
-        await fetch(`${import.meta.env.VITE_API_BASE}/history/${historyId}/conversation`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            conversation: [message, reply],
-          }),
-        });
-      } catch (err) {
-        console.error('儲存對話失敗：', err);
-      }
+      setConversation((prev) => [...prev, reply]);
+      onReplyChange?.(reply.content);
+    } catch (err) {
+      console.error('儲存對話失敗：', err);
+      const errorReply: Message = {
+        role: 'bot',
+        content: '系統錯誤，請稍後再試',
+      };
+      setConversation((prev) => [...prev, errorReply]);
     }
   };
 

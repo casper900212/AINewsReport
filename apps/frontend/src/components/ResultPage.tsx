@@ -4,11 +4,10 @@ import { IoNewspaper } from "react-icons/io5";
 import ChatApp from "./ChatApp";
 import "../styles/ResultPage.css";
 import { useProductionStore } from "../stores/useProductionStore";
-import { useFakeSearchStore } from "../stores/useFakeSearchStore";
 import ResultCanva from "./ResultCanva";
 
 export default function ResultPage() {
-  const { historyId } = useParams<{ historyId: string }>();
+  const { conversationId } = useParams<{ conversationId: string }>();
   const [record, setRecord] = useState<any | null>(null);
   const [currentPrompt, setCurrentPrompt] = useState("");
   const addProductionRecord = useProductionStore(
@@ -19,40 +18,26 @@ export default function ResultPage() {
   const handleToggleCollapse = () => setIsCollapsed((prev) => !prev);
 
   useEffect(() => {
-    if (historyId) {
-      const localRecord = useFakeSearchStore
-        .getState()
-        .records.find((r) => r.id === historyId);
-  
-      if (localRecord) {
-        setRecord(localRecord);
-      } else {
-        fetch(`${import.meta.env.VITE_API_BASE}/history/${historyId}`)
-          .then((res) => res.json())
-          .then((res) => {
-            setRecord(res.data);
-          })
-          .catch((err) => {
-            console.error("讀取歷史紀錄失敗：", err);
-          });
-      }
+    if (conversationId && conversationId !== 'undefined') {
+      fetch(`http://localhost:3000/api/v1/conversations/${conversationId}`)
+        .then((res) => res.json())
+        .then((res) => {
+          console.log("對話內容載入成功", res);
+          setRecord(res.data);
+        })
+        .catch((err) => {
+          console.error("載入對話失敗：", err);
+        });
     }
-  }, [historyId]);
+  }, [conversationId]);
 
-  if (!historyId || !record) {
+  if (!conversationId || !record) {
     return <p style={{ padding: "1rem" }}>載入中...</p>;
   }
 
   return (
     <div className="result-page-container">
-      <div
-        className="result-layout"
-        style={{
-          position: "relative",
-          height: "100%",
-          display: "flex",
-        }}
-      >
+      <div className="result-layout" style={{ position: "relative", height: "100%", display: "flex" }}>
         {/* 左側 ChatApp */}
         <div
           className="left-panel"
@@ -63,7 +48,8 @@ export default function ResultPage() {
           }}
         >
           <ChatApp
-            historyId={historyId!}
+            conversationId={conversationId}
+            messages={record.messages}
             onPromptChange={(prompt) => setCurrentPrompt(prompt)}
             onReplyChange={() => {}}
           />
@@ -92,7 +78,7 @@ export default function ResultPage() {
           />
         </div>
 
-        {/* 收合狀態下的展開按鈕 */}
+        {/* 展開按鈕 */}
         {isCollapsed && (
           <button
             onClick={handleToggleCollapse}

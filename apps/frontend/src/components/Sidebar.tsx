@@ -8,9 +8,10 @@ import { useNavigate } from 'react-router-dom';
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  historyRefreshKey: number; // ✅ 正確接收從 App 傳進來的 key
 }
 
-export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, historyRefreshKey }: SidebarProps) {
   const navigate = useNavigate();
 
   const handleHistorySelect = (label: string) => {
@@ -25,7 +26,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       {!collapsed && (
         <>
-          {/* 🔼 收合按鈕放最上面 */}
+          {/* 收合按鈕 */}
           <div className="sidebar-header">
             <button className="sidebar-collapse-button" onClick={onToggle}>
               <FaChevronLeft size={16} />
@@ -40,7 +41,10 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             >
               新查詢
             </button>
-            <HistoryPanel onSelect={handleHistorySelect} />
+
+            {/* ✅ 傳入 refreshKey 給 HistoryPanel */}
+            <HistoryPanel onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />
+
             <SubscriptionPanel />
             <ProducePanel onSelect={handleOrderSelect} />
           </div>
