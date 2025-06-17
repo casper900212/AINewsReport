@@ -21,6 +21,18 @@ const bree = new Bree({
 })
 
 /**
+ * Executes a job by name.
+ */
+export const runJobByName = async (name: string) => {
+  try {
+    await bree.run(name)
+    logger.info(`[ScheduleManager] Job executed successfully: ${name}`)
+  } catch (error) {
+    logger.error(`[ScheduleManager] Failed to execute job: ${name}, error: ${error}`)
+  }
+}
+
+/**
  * Adds and starts a schedule.
  */
 const addAndStartSchedule = async (config: { name: string; cron: string; path: string }) => {
@@ -32,7 +44,7 @@ const addAndStartSchedule = async (config: { name: string; cron: string; path: s
 /**
  * Removes a schedule by name.
  */
-const removeSchedule = async (name: string) => {
+export const removeSchedule = async (name: string) => {
   try {
     await bree.remove(name)
   } catch {
