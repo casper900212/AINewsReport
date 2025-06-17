@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 interface Message {
-  role: "user" | "bot";
+  role: "user" | "assistant";
   content: string;
 }
 

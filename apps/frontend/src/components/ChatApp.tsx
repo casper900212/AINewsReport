@@ -10,7 +10,7 @@ interface ChatAppProps {
 }
 
 interface Message {
-  role: 'user' | 'bot';
+  role: 'user' | 'assistant';
   content: string;
 }
 
@@ -25,7 +25,7 @@ export default function ChatApp({
   // 初始化從 props.messages 載入對話
   useEffect(() => {
     const formatted: Message[] = messages.map((msg) => ({
-      role: msg.role === 'assistant' ? 'bot' : 'user',
+      role: msg.role === 'assistant' ? 'assistant' : 'user',
       content: msg.content,
     }));
     setConversation(formatted);
@@ -49,7 +49,7 @@ export default function ChatApp({
 
       const data = await res.json();
       const reply: Message = {
-        role: 'bot',
+        role: 'assistant',
         content: data.data.response,
       };
 
@@ -58,7 +58,7 @@ export default function ChatApp({
     } catch (err) {
       console.error('儲存對話失敗：', err);
       const errorReply: Message = {
-        role: 'bot',
+        role: 'assistant',
         content: '系統錯誤，請稍後再試',
       };
       setConversation((prev) => [...prev, errorReply]);

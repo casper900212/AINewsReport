@@ -1,7 +1,7 @@
 import "../styles/PromptHistory.css";
 
 interface Message {
-  role: 'user' | 'bot';
+  role: 'user' | 'assistant';
   content: string;
 }
 
@@ -17,7 +17,7 @@ export default function PromptHistory({ history }: PromptHistoryProps) {
         {history.map((msg, index) => (
           <li
             key={index}
-            className={`chat-message ${msg.role === 'user' ? 'user' : 'bot'}`}
+            className={`chat-message ${msg.role === 'user' ? 'user' : 'assistant'}`}
           >
             {msg.content}
           </li>
