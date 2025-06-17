@@ -4,6 +4,11 @@ from langchain_ollama import OllamaLLM
 from langchain.chains import RetrievalQA
 from langchain_core.documents import Document
 from langchain.chains.question_answering import load_qa_chain
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain
+from langchain.prompts import PromptTemplate
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from qdrant_client import QdrantClient
 import yaml, os
@@ -12,6 +17,8 @@ import re
 from prompts import SYSTEM_PROMPT, INDUSTRY_PROMPTS, SUMMARY_PROMPT
 from collections import defaultdict
 import argparse
+import getpass
+
 
 # 讀取 config 設定
 def load_industry_config(config_path: str):
@@ -28,7 +35,10 @@ def load_industry_config(config_path: str):
 # 初始化 LLM
 def init_llm():
     # return OllamaLLM(model="mistral")
-    return OllamaLLM(model="gemma3:latest")
+    if "GOOGLE_API_KEY" not in os.environ:
+        os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter your Google AI API key: ")
+    llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash', temperature=0)
+    return llm
 
 # 從提示中提取日期
 def extract_date_from_prompt(prompt: str, target_month: str = None) -> str:
@@ -42,8 +52,8 @@ def extract_date_from_prompt(prompt: str, target_month: str = None) -> str:
         return match.group(0)
     return datetime.now().strftime('%Y-%m')  # 如果沒有找到日期，使用當前月份
 
-def get_diverse_sources(vectorstore, query: str, k: int = 5):
-    """第一輪：獲取不同來源的文章"""
+def get_diverse_sources(vectorstore, query: str, k: int = 5, memory: ConversationBufferMemory = None):
+    """第一輪：獲取不同來源的文章，支援對話記憶"""
     # 使用較大的 k 值以確保有足夠的不同來源
     initial_docs = vectorstore.similarity_search(query, k=k*2)
     
@@ -58,79 +68,20 @@ def get_diverse_sources(vectorstore, query: str, k: int = 5):
     for url, docs in sources.items():
         if len(diverse_docs) >= k:
             break
-        diverse_docs.append(docs[0])  # 取每個來源的第一篇文章
+        # 取每個來源的第一篇文章
+        doc = docs[0]
+        diverse_docs.append(Document(
+            page_content=(
+                f"Title： {doc.metadata.get('title', 'N/A')}\n"
+                f"Date： {doc.metadata.get('publish_date', 'N/A')}\n"
+                f"Source： {url}\n"
+                f"{doc.page_content}"
+            ),
+            metadata=doc.metadata
+        ))
     
     return diverse_docs
 
-def get_related_content(vectorstore, source_docs, query: str):
-    """第二輪：獲取相同來源的所有相關文章"""
-    all_related_docs = []
-    seen_urls = set()
-    
-    # 獲取所有找到的URL
-    urls = [doc.metadata.get('url', 'unknown') for doc in source_docs]
-    urls = list(set(urls))  # 移除重複的URL
-    
-    # 使用Qdrant的filter功能直接獲取所有相同URL的文章
-    for url in urls:
-        if url in seen_urls:
-            continue
-            
-        seen_urls.add(url)
-        # 使用filter直接獲取所有相同URL的文章
-        related_docs = vectorstore.similarity_search(
-            query,
-            k=100,  # 設置較大的k值以確保獲取所有文章
-            filter={"url": url}  # 使用URL作為過濾條件
-        )
-        all_related_docs.extend(related_docs)
-    
-    return all_related_docs
-
-def combine_documents_by_url(documents):
-    """先按URL分組，再按ID順序合併文章"""
-    combined_docs = []
-    url_groups = defaultdict(list)
-    
-    # 第一步：按URL分組
-    for doc in documents:
-        url = doc.metadata.get('url', 'unknown')
-        url_groups[url].append(doc)
-    
-    # 第二步：對每個URL組內的文章按ID排序並合併
-    article_counter = 1
-    for url, docs in url_groups.items():
-        # 按ID排序
-        sorted_docs = sorted(docs, key=lambda x: x.metadata.get('id', ''))
-        
-        # 合併內容
-        combined_content = []
-        combined_content.append(f"###第{article_counter}篇文章###\n")
-        # 添加文章元數據
-        combined_content.append(
-            f"標題： {sorted_docs[0].metadata.get('title', 'N/A')}\n"
-            f"日期： {sorted_docs[0].metadata.get('publish_date', 'N/A')}\n"
-            f"來源： {url}"
-        )
-        for doc in sorted_docs:
-            content = doc.page_content
-            combined_content.append(content)
-        
-        
-        # 創建新的合併文檔
-        combined_doc = Document(
-            page_content="\n".join(combined_content),
-            metadata={
-                'url': url,
-                'title': sorted_docs[0].metadata.get('title', 'N/A'),
-                'publish_date': sorted_docs[0].metadata.get('publish_date', 'N/A'),
-                'source_count': len(docs)
-            }
-        )
-        combined_docs.append(combined_doc)
-        article_counter += 1
-    
-    return combined_docs
 
 # 建立產業月報
 def generate_industry_report(industry: str, keywords: list, prompt: str, output_dir: str, target_month: str = None):
@@ -138,18 +89,26 @@ def generate_industry_report(industry: str, keywords: list, prompt: str, output_
 
     # 從提示中提取日期
     date = extract_date_from_prompt(prompt, target_month)
-    # 當source 來源增加時改成動態調整
-    collection_name = f"blocktempo-articles-{date}-original"
+    collection_name = f"{date}"
     print(f"📊 使用集合: {collection_name}")
 
     qdrant = QdrantClient(url="http://localhost:6333")
-    embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/msmarco-bert-base-dot-v5")
+    embedding_model = HuggingFaceEmbeddings(
+        model_name="jinaai/jina-embeddings-v2-base-zh",
+        model_kwargs={'trust_remote_code': True}
+    )
 
     vectorstore = Qdrant(
-      client=qdrant,
-      collection_name=collection_name,
-      embeddings=embedding_model,
-      content_payload_key="text",  # 這行是關鍵
+        client=qdrant,
+        collection_name=collection_name,
+        embeddings=embedding_model,
+        content_payload_key="text",
+    )
+
+    # 初始化對話記憶
+    memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        return_messages=True
     )
 
     # 構建查詢
@@ -158,42 +117,41 @@ def generate_industry_report(industry: str, keywords: list, prompt: str, output_
     
     # 第一輪：獲取不同來源的文章
     print("🔍 第一輪：獲取不同來源的文章...")
-    diverse_docs = get_diverse_sources(vectorstore, query)
+    diverse_docs = get_diverse_sources(vectorstore, query, memory=memory)
     print(f"✅ 找到 {len(diverse_docs)} 個不同來源")
     
-    # 第二輪：獲取相同來源的相關文章
-    print("🔍 第二輪：獲取相關文章...")
-    all_related_docs = get_related_content(vectorstore, diverse_docs, query)
-    print(f"✅ 總共找到 {len(all_related_docs)} 篇相關文章")
-    
-    # 合併相同id的文章
-    print("🔄 合併相同url的文章...")
-    combined_docs = combine_documents_by_url(all_related_docs)
-    print(f"✅ 合併後共有 {len(combined_docs)} 篇文章")
-    
-    # 直接使用合併後的文章進行生成
+    # 初始化 LLM
     llm = init_llm()
-    chain = load_qa_chain(llm, chain_type="stuff")
+    
+    documents_text = "\n\n".join([doc.page_content for doc in diverse_docs])
     
     # 使用總結提示詞
     summary_prompt = SUMMARY_PROMPT.format(
         industry=industry,
         keywords=', '.join(keywords),
-        original_prompt=prompt
+        input_docs=documents_text,
     )
-    result = chain.invoke({"input_documents": combined_docs, "question": summary_prompt})
+    
+    output = llm.invoke([
+        SystemMessage(content=summary_prompt),
+        HumanMessage(content=prompt)
+    ])
+    
+    output_string = output.content
+    print(output_string)
     
     os.makedirs(output_dir, exist_ok=True)
     filename = f"{output_dir}/{industry}-report-{date}.md"
     with open(filename, "w", encoding="utf-8") as f:
         f.write(f"# {industry.title()} 產業月報 ({date})\n\n")
-        f.write(result["output_text"])
+        f.write(output_string)
         
+        '''
         # Add sources section
         f.write("\n\n---\n\n### 參考資料 (Retrieved Documents):\n")
         # 按來源URL分組顯示
         sources = defaultdict(list)
-        for doc in combined_docs:
+        for doc in diverse_docs:
             url = doc.metadata.get('url', 'N/A')
             sources[url].append(doc)
         
@@ -203,6 +161,7 @@ def generate_industry_report(industry: str, keywords: list, prompt: str, output_
             for doc in docs:
                 f.write(doc.page_content)
                 f.write("\n```\n")
+        '''
     
     print(f"✅ 已輸出：{filename}")
 
@@ -221,6 +180,7 @@ def main():
     if args.month:
         try:
             datetime.strptime(args.month, '%Y-%m')
+            print(args.month)
         except ValueError:
             print("❌ 錯誤：月份格式必須為 YYYY-MM")
             return

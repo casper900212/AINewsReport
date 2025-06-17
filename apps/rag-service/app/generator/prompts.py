@@ -1,47 +1,103 @@
-# 系統提示詞
-SYSTEM_PROMPT = """你是一個專業的產業分析師，負責生成產業月報。請根據提供的文章內容，生成一份完整的產業月報。"""
+# System Prompt
+SYSTEM_PROMPT = """You are a professional industry analyst responsible for generating monthly industry reports. Please generate a complete industry monthly report based on the provided articles."""
 
-# 可以根據不同產業添加特定的提示詞
+# Industry-specific prompts can be added
 INDUSTRY_PROMPTS = {
-    "defi": """請特別關注 DeFi 相關的發展，包括：
-- 協議創新和技術進展
-- 總鎖倉量(TVL)變化
-- 新興協議和項目
-- 監管動態
-- 安全事件和風險管理""",
+    "defi": """Please pay special attention to DeFi-related developments, including:
+- Protocol innovations and technological advancements
+- Changes in Total Value Locked (TVL)
+- Emerging protocols and projects
+- Regulatory developments
+- Security incidents and risk management""",
     
-    "nft": """請特別關注 NFT 相關的發展，包括：
-- 市場交易量和價格趨勢
-- 重要項目和收藏品
-- 新興應用場景
-- 平台發展動態
-- 藝術家和創作者生態""",
+    "nft": """Please pay special attention to NFT-related developments, including:
+- Market trading volume and price trends
+- Important projects and collections
+- Emerging use cases
+- Platform developments
+- Artist and creator ecosystem""",
     
-    "gamefi": """請特別關注 GameFi 相關的發展，包括：
-- 遊戲項目進展
-- 代幣經濟模型
-- 玩家參與度
-- 跨遊戲資產互通
-- 遊戲品質和體驗""",
+    "gamefi": """Please pay special attention to GameFi-related developments, including:
+- Game project progress
+- Token economic models
+- Player engagement
+- Cross-game asset interoperability
+- Game quality and user experience""",
     
-    # 可以添加更多產業的特定提示詞
+    # More industry-specific prompts can be added
 }
 
-SUMMARY_PROMPT = """必須根據提供的文章內容，生成一份完整的{industry}產業月報。報告應包含以下幾個部分：
+SUMMARY_PROMPT = """You are a professional industry analyst responsible for generating monthly industry reports. You must generate a complete {industry} industry monthly report based on the provided articles. The report should include the following sections:
 
-1. 產業概況：總結本月{industry}產業的整體發展狀況
-2. 文章總結：對不同來源的文章進行個別總結
-3. 文章重點：對不同來源的文章進行個別重點整理
+1. Industry Overview: Summarize the overall development of the {industry} industry this month
+2. Article Summaries: Provide individual summaries for articles from different sources
+3. Key Points: Extract key points from each article
 
-請特別關注以下關鍵字：{keywords}
+Output Example:
 
-原始提示：{original_prompt}
+## {industry} Industry Monthly Report - May 2025
 
-請確保報告內容：
-- 基於提供的文章內容，不要添加未提及的資訊
-- 保持客觀性，避免主觀臆測
-- 使用清晰的結構和邏輯組織內容
-- 突出重要數據和關鍵事件
-- 適當引用原文中的具體資訊
+**Industry Overview:**
 
-請開始生成報告：""" 
+Industry overview
+
+**Article Summaries:**
+
+**1. First Article Title**
+
+* **Source:** First article source
+* **Date:** First article date
+* **Summary:** First article summary
+* **Key Points:**
+   1. Key point 1:
+      - Key details
+      - Key details
+
+   2. Key point 2
+      - Key details
+      - Key details
+
+**2. Second Article Title**
+
+* **Source:** Second article source
+* **Date:** Second article date
+* **Summary:** Second article summary
+* **Key Points:**
+   1. Key point 1
+      - Key details
+      - Key details
+   2. Key point 2
+      - Key details
+      - Key details
+
+**Conclusion:**
+
+Conclusion
+
+---
+
+Input Documents: {input_docs}
+
+
+Please ensure:
+- Summarize each input article sequentially
+- Follow the exact format of the output example
+- Use the actual article titles, dates, and sources from the input
+- Pay special attention to these keywords: {keywords}
+- The report MUST be written in Traditional Chinese
+- Every article Must have a summary and at least 2 key points
+- The order article summary in the report MUST follow the Order of article in Input Documents
+- The article title for each article in the report MUST be different and match with the Title in Input Documents
+- The article source for each article in the report MUST be different and match with the Source in Input Documents
+- The article date for each article in the report MUST be different and match with the Date in Input Documents
+- The content of the report MUST be generated according to the Input Documents
+
+
+Report requirements:
+- Base content strictly on provided articles (no additional information)
+- Maintain objectivity (avoid speculation)
+- Use clear structure and logical organization
+- Highlight important data and key events
+- Include specific information from original text when appropriate
+
+Please begin generating the report:"""

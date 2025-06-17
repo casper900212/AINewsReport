@@ -1,6 +1,6 @@
 node_modules
-reportnews
+rag
 outputs
 qdrant_data
 data
-__pycache__
+app/generator/__pycache__
