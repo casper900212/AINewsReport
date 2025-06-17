@@ -12,6 +12,6 @@ export default class Crawler extends Base {
   @Column('boolean', { default: true })
   enabled!: boolean
 
-  @Column({ name: 'lase_run', type: 'timestamp', nullable: true })
+  @Column({ name: 'last_run', type: 'timestamp', nullable: true })
   lastRun!: Date | null
 }
