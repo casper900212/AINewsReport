@@ -1,28 +1,57 @@
 import { CreateCrawlerModel, UpdateCrawlerModel } from '../models/crawlerModel'
-import { userRepository } from '../repository/crawlerRepository'
+import { crawlerRepository } from '../repository/crawlerRepository'
+import { enableScheduleById, removeSchedule, runJobByName } from '../utils/scheduleManager'
+import { getSchedule } from './scheduleService'
 
 export const createCrawler = async (payload: CreateCrawlerModel) => {
-  const crawler = await userRepository.createCrawler(payload)
+  const crawler = await crawlerRepository.createCrawler(payload)
   return crawler
 }
 
+export const getCrawlerById = async (id: number) => {
+  const crawler = await crawlerRepository.getCrawlerById(id)
+  return crawler
+}
+
+export const getEnabledCrawlerList = async () => {
+  const crawlers = await crawlerRepository.getEnabledCrawlerList()
+  return crawlers
+}
+
 export const getCrawlerList = async () => {
-  const crawlers = await userRepository.getCrawlerList()
+  const crawlers = await crawlerRepository.getCrawlerList()
   return crawlers
 }
 
 export const updateCrawler = async (id: number, payload: UpdateCrawlerModel) => {
-  return await userRepository.updateCrawlerById(id, payload)
+  const crawler = await crawlerRepository.updateCrawlerById(id, payload)
+
+  if (payload.enabled) {
+    const schedule = await getSchedule()
+
+    if (schedule?.cron) {
+      await enableScheduleById(schedule.cron, crawler)
+    }
+  }
+
+  return crawler
 }
 
 export const deleteCrawler = async (id: number) => {
-  return await userRepository.deleteCrawlerById(id)
+  const removedCrawler = await crawlerRepository.deleteCrawlerById(id)
+
+  await removeSchedule(removedCrawler.name)
+
+  return removedCrawler
 }
 
 export const executeCrawler = async (id: number) => {
+  const { name } = await getCrawlerById(id)
   // TODO: 呼叫 python 爬蟲腳本
+  await runJobByName(name)
+
   const fakeResponse = { count: 100 }
-  await userRepository.updateCrawlerLastRun(id, new Date())
+  await crawlerRepository.updateCrawlerLastRun(id, new Date())
 
   return { count: fakeResponse.count, status: 'success' }
 }

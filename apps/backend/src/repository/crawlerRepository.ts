@@ -3,10 +3,18 @@ import Crawler from '../db/entity/Crawler'
 import { appDataSource } from '../utils/dbHelper'
 import { NotFoundError } from '../utils/errors'
 
-export const userRepository = appDataSource.getRepository(Crawler).extend({
+export const crawlerRepository = appDataSource.getRepository(Crawler).extend({
   async getCrawlerList () {
     const crawlers = await this.find({
       select: ['id', 'name', 'scriptFilename', 'enabled', 'lastRun'],
+    })
+    return crawlers
+  },
+
+  async getEnabledCrawlerList () {
+    const crawlers = await this.find({
+      select: ['id', 'name', 'scriptFilename', 'lastRun'],
+      where: { enabled: true },
     })
     return crawlers
   },
