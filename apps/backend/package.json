@@ -51,5 +51,6 @@
     "ignore": [
       "src/routes"
     ]
-  }
+  },
+  "overrides": { "cron-validate": "1.4.5" }
 }
