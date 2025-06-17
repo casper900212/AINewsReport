@@ -55,5 +55,10 @@
   },
   "overrides": {
     "cron-validate": "1.4.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "cron-validate": "1.4.5"
+    }
   }
 }
