@@ -3,8 +3,6 @@
 import Bree from 'bree'
 import path from 'path'
 import Crawler from '../db/entity/Crawler'
-import { getEnabledCrawlerList } from '../services/crawlerService'
-import { getSchedule } from '../services/scheduleService'
 import { logger } from './logger'
 
 /**
@@ -55,7 +53,7 @@ export const removeSchedule = async (name: string) => {
 /**
  * Handles schedule creation for a list of crawlers.
  */
-const handleScheduleCreation = async (cron: string, crawlers: Crawler[], options: {isInit: boolean } = { isInit: false }) => {
+const handleScheduleCreation = async (cron: string, crawlers: Crawler[], options: { isInit: boolean } = { isInit: false }) => {
   for (const crawler of crawlers) {
     if (!options.isInit) await removeSchedule(crawler.name)
 
@@ -70,29 +68,14 @@ const handleScheduleCreation = async (cron: string, crawlers: Crawler[], options
 }
 
 /**
- * Starts Bree schedules based on DB configuration.
- */
-export const startBreeSchedule = async () => {
-  const schedule = await getSchedule()
-  if (!schedule) {
-    logger.info('[ScheduleManager] No schedule configured in the database.')
-    return
-  }
-
-  const crawlers = await getEnabledCrawlerList()
-  if (!crawlers || crawlers.length === 0) {
-    logger.info('[ScheduleManager] No enabled crawlers found in the database.')
-    return
-  }
-
-  await handleScheduleCreation(schedule.cron, crawlers, { isInit: true })
-}
-
-/**
  * Starts schedules with provided cron and crawlers.
  */
-export const startSchedule = async (cron: string, crawlers: Crawler[]) => {
-  await handleScheduleCreation(cron, crawlers)
+export const startSchedule = async (
+  cron: string,
+  crawlers: Crawler[],
+  options: { isInit: boolean } = { isInit: false },
+) => {
+  await handleScheduleCreation(cron, crawlers, options)
 }
 
 /**
