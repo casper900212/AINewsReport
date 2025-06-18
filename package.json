@@ -16,5 +16,13 @@
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
+  },
+  "overrides": {
+    "cron-validate": "1.4.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "cron-validate": "1.4.5"
+    }
   }
 }
