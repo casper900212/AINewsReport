@@ -26,7 +26,7 @@ export class MessageRepository {
   async findByConversation(conversationId: number): Promise<Message[]> {
     return this.repo.find({
       where: { conversation: { id: conversationId } },
-      order: { created_at: 'ASC' },
+      order: { id: 'ASC' },
     })
   }
 

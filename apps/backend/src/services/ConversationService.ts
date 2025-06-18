@@ -118,5 +118,5 @@ export const deleteConversation = async (id: number): Promise<boolean> => {
 
 const callPythonRagService = async (query: string): Promise<string> => {
   // TODO: 換成實際 HTTP 請求
-  return `接RAG的回答`
+  return `已修改完成`
 }

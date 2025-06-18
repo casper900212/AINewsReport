@@ -19,7 +19,7 @@ export class ConversationRepository {
 
   async findAll(): Promise<Conversation[]> {
     return await this.repo.find({
-      order: { created_at: 'DESC' }, 
+      order: { id: 'DESC' }, 
     })
   }
 
