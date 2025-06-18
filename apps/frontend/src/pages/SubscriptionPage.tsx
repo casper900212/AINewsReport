@@ -1,5 +1,23 @@
-import { useState, useEffect } from 'react';
-import '../styles/SubscriptionPage.css';
+import { useState, useEffect } from "react";
+import "../styles/SubscriptionPage.css";
+
+const currentYear = new Date().getFullYear();
+const currentMonth = new Date().getMonth() + 1;
+
+const yearOptions = Array.from({ length: 11 }, (_, i) => {
+  const year = currentYear - 10 + i;
+  return { label: year.toString(), value: year };
+});
+
+const getMonthOptions = (year: number | null) => {
+  const maxMonth = year === currentYear ? currentMonth : 12;
+  return Array.from({ length: maxMonth }, (_, i) => i + 1);
+};
+
+const cronOptions = [
+  { value: "", label: "未設定" },
+  { value: "0 9 1 * *", label: "每月一次" },
+];
 
 type Source = {
   id: number;
@@ -10,150 +28,149 @@ type Source = {
 
 export default function SubscriptionPage() {
   const [sources, setSources] = useState<Source[]>([]);
-  const [selected, setSelected] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState('');
-  const [frequency, setFrequency] = useState('');
-  const [startTime, setStartTime] = useState('');
+  const [, setSelected] = useState<string[]>([]);
+  const [frequency, setFrequency] = useState<string>("");
+
+  const [manualStartYear, setManualStartYear] = useState<number | null>(null);
+  const [manualStartMonth, setManualStartMonth] = useState<number | null>(null);
+  const [manualEndYear, setManualEndYear] = useState<number | null>(null);
+  const [manualEndMonth, setManualEndMonth] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/v1/crawler', {
-      headers: {
-        Accept: 'application/json',
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        const mapped: Source[] = data.data.map((c: any): Source => ({
-          id: c.id,
-          value: c.scriptFilename.replace('.py', ''),
-          label: c.name,
-          enabled: c.enabled,
-        }));
+    fetch("http://localhost:3000/api/v1/crawler")
+      .then((res) => res.json())
+      .then((data) => {
+        const mapped: Source[] = data.data.map(
+          (c: {
+            id: number;
+            scriptFilename: string;
+            name: string;
+            enabled: boolean;
+          }) => ({
+            id: c.id,
+            value: c.scriptFilename.replace(".py", ""),
+            label: c.name,
+            enabled: c.enabled,
+          })
+        );
         setSources(mapped);
-        setSelected(mapped.filter(c => c.enabled).map(c => c.value));
+        setSelected(mapped.filter((c) => c.enabled).map((c) => c.value));
       })
-      .catch(err => {
-        console.error('無法載入來源清單：', err);
-      });
-  }, []);
+      .catch((err) => console.error("無法載入來源清單：", err));
 
-  useEffect(() => {
-    const stored = localStorage.getItem('crawlerScheduleV2');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setStartDate(parsed.startDate || '');
-      setFrequency(parsed.frequency || '');
-      setStartTime(parsed.startTime || '');
-    }
-  }, []);
-
-  const toggleSelection = async (value: string) => {
-    const isSelected = selected.includes(value);
-    const updated = isSelected
-      ? selected.filter((v) => v !== value)
-      : [...selected, value];
-
-    setSelected(updated);
-    localStorage.setItem('preferredSources', JSON.stringify(updated));
-
-    const source = sources.find((s) => s.value === value);
-    if (!source) return;
-
-    try {
-      const res = await fetch(`http://localhost:3000/api/v1/crawler/${source.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({ enabled: !isSelected }),
+    fetch("http://localhost:3000/api/v1/schedule")
+      .then((res) => res.json())
+      .then((data) => {
+        setFrequency(data?.data?.cron?.trim?.() || "");
+      })
+      .catch((err) => {
+        console.error("無法取得排程設定：", err);
+        setFrequency("");
       });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText);
-      }
+    setManualStartYear(currentYear);
+    setManualStartMonth(currentMonth);
+    setManualEndYear(currentYear);
+    setManualEndMonth(currentMonth);
+  }, []);
 
-      setSources((prev) =>
-        prev.map((s) =>
-          s.id === source.id ? { ...s, enabled: !isSelected } : s
-        )
-      );
-    } catch (err) {
-      alert(`更新啟用狀態失敗：${(err as Error).message}`);
-    }
+  const toggleSource = (src: Source) => {
+    const updated = !src.enabled;
+    fetch(`http://localhost:3000/api/v1/crawler/${src.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        name: src.label,
+        enabled: updated,
+      }),
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setSources((prev) =>
+          prev.map((s) => (s.id === src.id ? { ...s, enabled: updated } : s))
+        );
+      })
+      .catch((err) => {
+        console.error("更新來源狀態失敗：", err);
+        alert("更新來源狀態失敗");
+      });
   };
 
-  const handleSave = () => {
-    if (!startDate || !frequency || !startTime) {
-      alert('請完整填寫所有排程欄位');
+  const handleSave = async () => {
+    if (!frequency) {
+      alert("請選擇排程頻率");
       return;
     }
-    const config = { startDate, frequency, startTime };
-    localStorage.setItem('crawlerScheduleV2', JSON.stringify(config));
-    alert('排程已儲存');
-  };
-
-  const handleTriggerCrawlers = async () => {
-    const selectedSourceIds = sources
-      .filter((s) => s.enabled)
-      .map((s) => s.id);
-
-    const results: {
-      id: number;
-      label: string;
-      success: boolean;
-      count?: number;
-      error?: string;
-    }[] = [];
 
     try {
-      for (const id of selectedSourceIds) {
-        const label = sources.find((s) => s.id === id)?.label || `ID ${id}`;
-        try {
-          const res = await fetch(`http://localhost:3000/api/v1/crawler/${id}/run`, {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-            },
-          });
-
-          if (!res.ok) {
-            const errorText = await res.text();
-            results.push({ id, label, success: false, error: errorText });
-            continue;
-          }
-
-          const data = await res.json();
-          results.push({ id, label, success: true, count: data.count });
-        } catch (err: any) {
-          results.push({ id, label, success: false, error: err.message });
-        }
+      const response = await fetch("http://localhost:3000/api/v1/schedule", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ cron: frequency }),
+      });
+      const result = await response.json();
+      if (response.ok && result.status === "Success") {
+        alert("排程已儲存並成功送出 API");
+      } else {
+        alert("API 回傳錯誤");
       }
-
-      const successList = results.filter((r) => r.success);
-      const failList = results
-        .filter((r) => !r.success)
-        .map((r) => `${r.label}${r.error ? `：${r.error}` : ''}`)
-        .join('\n');
-
-      let message = '';
-      if (successList.length) message += `執行成功`;
-      if (failList) message += `\n執行失敗：\n${failList}`;
-      if (!message) message = '沒有任何執行結果';
-      alert(message.trim());
-    } catch (err) {
-      console.error(err);
-      alert('執行過程中發生例外錯誤');
+    } catch (error) {
+      alert("無法連接 API");
     }
   };
 
-  const getFrequencyLabel = (value: string) => {
-    switch (value) {
-      case 'daily': return '每天';
-      case 'weekly': return '每週';
-      case 'monthly': return '每月';
-      default: return '';
+  const handleManualTrigger = async () => {
+    if (
+      !manualStartYear ||
+      !manualStartMonth ||
+      !manualEndYear ||
+      !manualEndMonth
+    ) {
+      alert("請選擇完整的起迄區間");
+      return;
+    }
+
+    const start = `${manualStartYear}-${String(manualStartMonth).padStart(2, "0")}`;
+    const end = `${manualEndYear}-${String(manualEndMonth).padStart(2, "0")}`;
+    const enabledSources = sources.filter((s) => s.enabled);
+
+    if (enabledSources.length === 0) {
+      alert("請至少啟用一個爬蟲來源");
+      return;
+    }
+
+    try {
+      const results = await Promise.all(
+        enabledSources.map((src) =>
+          fetch(`http://localhost:3000/api/v1/crawler/${src.id}/run`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ start, end }),
+          })
+            .then((res) => res.json())
+            .then((data) => ({
+              source: src.label,
+              count: data?.data?.count ?? 0,
+              status: data?.data?.status ?? "unknown",
+            }))
+        )
+      );
+
+      const summary = results
+        .map((r) => `${r.source}: ${r.count} 筆 (${r.status})`)
+        .join("\n");
+      alert(`手動觸發完成：\n${summary}`);
+    } catch (err) {
+      alert("手動觸發失敗，請稍後再試");
     }
   };
 
@@ -171,7 +188,7 @@ export default function SubscriptionPage() {
               <input
                 type="checkbox"
                 checked={src.enabled}
-                onChange={() => toggleSelection(src.value)}
+                onChange={() => toggleSource(src)}
               />
               {src.label}
             </label>
@@ -179,52 +196,109 @@ export default function SubscriptionPage() {
         )}
       </section>
 
-      <div style={{ marginTop: '1.5rem' }}>
-        <button onClick={handleTriggerCrawlers}>手動觸發所有爬蟲</button>
-      </div>
-
       <section className="schedule-section">
         <h2>設定爬蟲排程</h2>
         <div className="form-group">
-          <label>
-            開始日期：
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-          </label>
-
           <label>
             重複頻率：
             <select
               value={frequency}
               onChange={(e) => setFrequency(e.target.value)}
+              className="form-select"
+              style={{ height: "48px", fontSize: "16px" }}
             >
-              <option value="" disabled>選擇頻率</option>
-              <option value="daily">每天</option>
-              <option value="weekly">每週</option>
-              <option value="monthly">每月</option>
+              {cronOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </label>
-
-          <label>
-            開始時間：
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-            />
-          </label>
-
-          <button onClick={handleSave}>儲存排程</button>
         </div>
+        <div style={{ textAlign: "center" }}>
+          <button
+            onClick={handleSave}
+            style={{ width: "150px", margin: "0 auto", backgroundColor: "#223e7b", color: "white" }}
+          >
+            儲存排程
+          </button>
+        </div>
+      </section>
 
-        {startDate && frequency && startTime && (
-          <div className="current-schedule">
-            當前排程：從 {startDate} 起，{getFrequencyLabel(frequency)}，{startTime} 開始
-          </div>
-        )}
+      <section className="source-section">
+        <h5>手動觸發爬蟲</h5>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, auto)",
+            gap: "16px",
+            marginBottom: "1rem",
+          }}
+        >
+          {[
+            {
+              value: manualStartYear,
+              setValue: setManualStartYear,
+              placeholder: "起始年份",
+              options: yearOptions,
+            },
+            {
+              value: manualStartMonth,
+              setValue: setManualStartMonth,
+              placeholder: "起始月份",
+              options: getMonthOptions(manualStartYear).map((m) => ({
+                value: m,
+                label: String(m).padStart(2, "0"),
+              })),
+            },
+            {
+              value: manualEndYear,
+              setValue: setManualEndYear,
+              placeholder: "結束年份",
+              options: yearOptions,
+            },
+            {
+              value: manualEndMonth,
+              setValue: setManualEndMonth,
+              placeholder: "結束月份",
+              options: getMonthOptions(manualEndYear).map((m) => ({
+                value: m,
+                label: String(m).padStart(2, "0"),
+              })),
+            },
+          ].map((item, idx) => (
+            <select
+              key={idx}
+              value={item.value ?? ""}
+              onChange={(e) => item.setValue(Number(e.target.value))}
+              className="form-select"
+              style={{
+                height: "48px",
+                fontSize: "16px",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+                padding: "8px",
+              }}
+            >
+              <option value="" disabled style={{ padding: "8px" }}>
+                {item.placeholder}
+              </option>
+              {item.options.map((opt: any) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          ))}
+        </div>
+        <div className="schedule-section" style={{ textAlign: "center" }}>
+          <button
+            onClick={handleManualTrigger}
+            style={{ width: "150px", margin: "0 auto", backgroundColor: "#223e7b", color: "white" }}
+          >
+            開始
+          </button>
+        </div>
       </section>
     </div>
   );

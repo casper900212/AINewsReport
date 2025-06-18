@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import Select from "react-select";
-import { Select as SemiSelect } from "@douyinfe/semi-ui";
 import "../styles/SearchPanel.css";
 import { useNavigate } from "react-router-dom";
 
@@ -179,31 +178,19 @@ export default function SearchPanel({
 
             <div className="input-group">
               <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-                <SemiSelect
+                <Select
+                  options={yearOptions}
+                  value={yearOptions.find(opt => opt.value === selectedYear)}
+                  onChange={(val) => setSelectedYear(val?.value ?? currentYear)}
                   placeholder="年份"
-                  style={{ flex: 1 }}
-                  value={selectedYear}
-                  onChange={(value) => setSelectedYear(value as number)}
-                >
-                  {yearOptions.map((option) => (
-                    <SemiSelect.Option key={option.value} value={option.value}>
-                      {option.label}
-                    </SemiSelect.Option>
-                  ))}
-                </SemiSelect>
+                />
 
-                <SemiSelect
+                <Select
+                  options={monthOptions}
+                  value={monthOptions.find(opt => opt.value === selectedMonth)}
+                  onChange={(val) => setSelectedMonth(val?.value ?? currentMonth)}
                   placeholder="月份"
-                  style={{ flex: 1 }}
-                  value={selectedMonth}
-                  onChange={(value) => setSelectedMonth(value as number)}
-                >
-                  {monthOptions.map((option) => (
-                    <SemiSelect.Option key={option.value} value={option.value}>
-                      {option.label}
-                    </SemiSelect.Option>
-                  ))}
-                </SemiSelect>
+                />
               </div>
             </div>
 
@@ -230,15 +217,15 @@ export default function SearchPanel({
                   const numericValue = Number(limit);
                   if (!limit || isNaN(numericValue) || numericValue < 1) {
                     setLimitError(true);
-                  } else if (numericValue > 10) {
+                  } else if (numericValue > 5) {
                     alert("最多只能輸入 10 筆");
-                    setLimit("10");
+                    setLimit("5");
                     setLimitError(false);
                   }
                 }}
-                placeholder="輸入要的新聞筆數(1~10)"
+                placeholder="輸入要的新聞筆數(1~5)"
                 min={1}
-                max={10}
+                max={5}
               />
             </div>
 
