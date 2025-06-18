@@ -1,6 +1,8 @@
-import { CreateCrawlerModel, UpdateCrawlerModel } from '../models/crawlerModel'
+import { CreateCrawlerModel, RunCrawlerModel, UpdateCrawlerModel } from '../models/crawlerModel'
 import { crawlerRepository } from '../repository/crawlerRepository'
+import { logger } from '../utils/logger'
 import { enableScheduleById, removeSchedule, runJobByName } from '../utils/scheduleManager'
+// eslint-disable-next-line import/no-cycle
 import { getSchedule } from './scheduleService'
 
 export const createCrawler = async (payload: CreateCrawlerModel) => {
@@ -45,8 +47,10 @@ export const deleteCrawler = async (id: number) => {
   return removedCrawler
 }
 
-export const executeCrawler = async (id: number) => {
+export const executeCrawler = async (id: number, payload: RunCrawlerModel) => {
   const { name } = await getCrawlerById(id)
+
+  logger.info(`Executing crawler: ${name}, start date: ${payload.start}, end date: ${payload.end}.`)
   // TODO: 呼叫 python 爬蟲腳本
   await runJobByName(name)
 

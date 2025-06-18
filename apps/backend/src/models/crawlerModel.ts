@@ -35,6 +35,20 @@ export interface UpdateCrawlerModel {
   enabled?: boolean
 }
 
+export interface RunCrawlerModel {
+  /**
+   * 開始年月 YYYY-MM
+   * @example '2025-05'
+   */
+  start: string
+
+  /**
+   * 結束年月 YYYY-MM
+   * @example '2025-05'
+   */
+  end: string
+}
+
 export interface RunCrawlerResponseModel extends SuccessResponseModel {
   data: {
     /**

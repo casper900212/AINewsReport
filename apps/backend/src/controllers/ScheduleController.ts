@@ -19,9 +19,12 @@ export class ScheduleController extends Controller {
   @Response<ExpectedErrorResponseModel>(400, 'Expected error')
   @Response<UnexpectedErrorResponseModel>(500, 'Unexpected error')
   public async upsertSchedule (
-    @Body() requestBody: { cron: string },
+    @Body() requestBody: { cron?: string },
   ): Promise<UpsertScheduleResponseModel> {
-    const schedule = await upsertSchedule(requestBody.cron)
+    const defaultCron = '0 0 1 * *' // 每月第一天的凌晨
+    const cronExpression = requestBody.cron || defaultCron
+
+    const schedule = await upsertSchedule(cronExpression)
     return sendOk({ data: schedule })
   }
 

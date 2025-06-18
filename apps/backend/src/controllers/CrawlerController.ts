@@ -1,5 +1,14 @@
 import { Body, Controller, Delete, Get, Patch, Path, Post, Response, Route, Tags } from 'tsoa'
-import { CreateCrawlerModel, CreateCrawlerResponseModel, ExpectedErrorResponseModel, GetCrawlerListResponseModel, SuccessResponseModel, UnexpectedErrorResponseModel, UpdateCrawlerModel } from '../models'
+import {
+  CreateCrawlerModel,
+  CreateCrawlerResponseModel,
+  ExpectedErrorResponseModel,
+  GetCrawlerListResponseModel,
+  RunCrawlerModel,
+  SuccessResponseModel,
+  UnexpectedErrorResponseModel,
+  UpdateCrawlerModel,
+} from '../models'
 import { createCrawler, deleteCrawler, executeCrawler, getCrawlerList, updateCrawler } from '../services'
 import { sendOk } from '../utils/routeHelper'
 
@@ -70,8 +79,9 @@ export class CrawlerController extends Controller {
   @Response<UnexpectedErrorResponseModel>(500, 'Unexpected error')
   public async runCrawler (
     @Path() id: number,
+    @Body() requestBody: RunCrawlerModel,
   ): Promise<SuccessResponseModel> {
-    const data = await executeCrawler(id)
+    const data = await executeCrawler(id, requestBody)
     return sendOk({ data })
   }
 }
