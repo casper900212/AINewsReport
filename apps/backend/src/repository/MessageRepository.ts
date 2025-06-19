@@ -12,7 +12,7 @@ export class MessageRepository {
 
   async saveMessage(
     conversationId: number,
-    role: 'user' | 'assistant',
+    role: 'user' | 'assistant' | 'human',
     content: string
   ): Promise<Message> {
     const message = this.repo.create({

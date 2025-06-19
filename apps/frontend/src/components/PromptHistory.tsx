@@ -14,12 +14,9 @@ export default function PromptHistory({ history }: PromptHistoryProps) {
     <div className="prompt-history">
       <h3 className="prompt-history-title">對話紀錄</h3>
       <ul className="chat-history-list">
-        {history.map((msg, index) => (
-          <li
-            key={index}
-            className={`chat-message ${msg.role === 'user' ? 'user' : 'assistant'}`}
-          >
-            {msg.content}
+        {history.map((m, i) => (
+          <li key={i} className={`chat-message ${m.role}`}>
+            {m.content}
           </li>
         ))}
       </ul>

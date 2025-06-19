@@ -16,9 +16,18 @@ export default function ResultPage() {
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const handleToggleCollapse = () => setIsCollapsed((prev) => !prev);
+  const refetchConversation = () => {
+    fetch(`http://localhost:3000/api/v1/conversations/${conversationId}`)
+      .then((res) => res.json())
+      .then((res) => {
+        console.log("資料更新成功", res);
+        setRecord(res.data);
+      })
+      .catch((err) => console.error("重新載入對話失敗", err));
+  };
 
   useEffect(() => {
-    if (conversationId && conversationId !== 'undefined') {
+    if (conversationId && conversationId !== "undefined") {
       fetch(`http://localhost:3000/api/v1/conversations/${conversationId}`)
         .then((res) => res.json())
         .then((res) => {
@@ -37,7 +46,14 @@ export default function ResultPage() {
 
   return (
     <div className="result-page-container">
-      <div className="result-layout" style={{ position: "relative", height: "100%", display: "flex" }}>
+      <div
+        className="result-layout"
+        style={{
+          position: "relative",
+          height: "100%",
+          display: "flex",
+        }}
+      >
         {/* 左側 ChatApp */}
         <div
           className="left-panel"
@@ -49,9 +65,12 @@ export default function ResultPage() {
         >
           <ChatApp
             conversationId={conversationId}
-            messages={record.messages}
+            messages={record.messages.filter(
+              (msg: any) => msg.role === "user" || msg.role === "assistant"
+            )} 
             onPromptChange={(prompt) => setCurrentPrompt(prompt)}
-            onReplyChange={() => {}}
+            onReplyChange={refetchConversation} 
+
           />
         </div>
 
@@ -75,6 +94,7 @@ export default function ResultPage() {
             addProductionRecord={addProductionRecord}
             isCollapsed={isCollapsed}
             onToggleCollapse={handleToggleCollapse}
+            conversationId={Number(conversationId)}
           />
         </div>
 
