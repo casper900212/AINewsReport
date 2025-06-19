@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, HttpUrl
 from typing import List, Optional, Literal
+from generator import monthly_report_generator
 import time
 
 app = FastAPI()
@@ -8,12 +9,12 @@ app = FastAPI()
 # -------------------- RAG 問答 API --------------------
 
 class QueryRequest(BaseModel):
-    query: str
-    top_k: int = 3
+    conversation_history: List[dict] # Renamed for clarity and to match monthly_report_generator's expectation
+    previous_report_content: Optional[str] = None # Renamed for clarity and to match monthly_report_generator's expectation
 
 class QueryResponse(BaseModel):
-    answer: str
-    sources: List[str]
+    output: str
+    sources: list
 
 def retrieve_documents(query: str, top_k: int) -> List[str]:
     # TODO: 向量檢索
@@ -26,11 +27,16 @@ def generate_answer(query: str, contexts: List[str]) -> str:
 
 @app.post("/query", response_model=QueryResponse)
 def query_rag(req: QueryRequest):
-    if not req.query.strip():
-        raise HTTPException(status_code=400, detail="Query string cannot be empty")
-    docs = retrieve_documents(req.query, req.top_k)
-    answer = generate_answer(req.query, docs)
-    return QueryResponse(answer=answer, sources=docs)
+    # The check for empty query string might be more complex now depending on history content
+    # For now, we'll assume the history will always contain something meaningful for processing
+    if not req.conversation_history:
+         raise HTTPException(status_code=400, detail="Conversation history cannot be empty")
+
+    docs, output = monthly_report_generator.process_revision_request(
+        req.conversation_history,
+        req.previous_report_content
+    )
+    return QueryResponse(output=output, sources=docs)
 
 # -------------------- 同步爬蟲 API --------------------
 

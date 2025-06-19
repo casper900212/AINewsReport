@@ -13,7 +13,7 @@ import yaml, os
 from datetime import datetime
 import re
 # Assuming prompts.py contains these. We'll adapt SUMMARY_PROMPT or create a new REVISION_PROMPT.
-from prompts import SYSTEM_PROMPT, INDUSTRY_PROMPTS, SUMMARY_PROMPT
+# from prompts import SYSTEM_PROMPT, INDUSTRY_PROMPTS, SUMMARY_PROMPT
 from collections import defaultdict
 import argparse
 import getpass
@@ -103,6 +103,143 @@ def get_diverse_sources(vectorstore, query: str, k: int = 5):
 
 def process_revision_request(request_data: dict, output_dir: str = None):
     
+    SUMMARY_PROMPT = """You are a professional industry analyst responsible for generating monthly industry reports. You must generate a complete industry monthly report based on the provided articles. The report should include the following sections:
+
+        1. Industry Overview: Summarize the overall development of the Blockchain industry this month
+        2. Article Summaries: Provide individual summaries for articles from different sources
+        3. Key Points: Extract key points from each article
+
+        Output Example:
+
+        # Blockchain Industry Monthly Report - January 2025
+
+        **Industry Overview:**
+
+        Industry overview
+
+        **Article Summaries:**
+
+        **1. Title of Article 1**
+
+        * **Source:** Source of Article 1
+        * **Date:** Date of Article 1
+        * **Summary:** Summary of Article 1
+        * **Key Points:**
+        1. Key point 1:
+            - Key details
+            - Key details
+
+        2. Key point 2
+            - Key details
+            - Key details
+        
+        3. Key point 3
+            - Key details
+            - Key details
+
+        **2. Title of Article 2**
+
+        * **Source:** Source of Article 2
+        * **Date:** Date of Article 2
+        * **Summary:** Summary of Article 2
+        * **Key Points:**
+        1. Key point 1:
+            - Key details
+            - Key details
+
+        2. Key point 2
+            - Key details
+            - Key details
+        
+        3. Key point 3
+            - Key details
+            - Key details
+
+        **3. Title of Article 3**
+
+        * **Source:** Source of Article 3
+        * **Date:** Date of Article 3
+        * **Summary:** Summary of Article 3
+        * **Key Points:**
+        1. Key point 1:
+            - Key details
+            - Key details
+
+        2. Key point 2
+            - Key details
+            - Key details
+        
+        3. Key point 3
+            - Key details
+            - Key details
+            
+        **4. Title of Article 4**
+
+        * **Source:** Source of Article 4
+        * **Date:** Date of Article 4
+        * **Summary:** Summary of Article 4
+        * **Key Points:**
+        1. Key point 1:
+            - Key details
+            - Key details
+
+        2. Key point 2
+            - Key details
+            - Key details
+        
+        3. Key point 3
+            - Key details
+            - Key details
+            
+        **5. Title of Article 5**
+
+        * **Source:** Source of Article 5
+        * **Date:** Date of Article 5
+        * **Summary:** Summary of Article 5
+        * **Key Points:**
+        1. Key point 1:
+            - Key details
+            - Key details
+
+        2. Key point 2
+            - Key details
+            - Key details
+        
+        3. Key point 3
+            - Key details
+            - Key details
+        **Conclusion:**
+
+        Conclusion
+
+        ---
+
+        Input Documents: {input_docs}
+        Previous Report: {pre_report}
+
+
+        Necessary Rules:
+        - Summarize each input article sequentially
+        - The output format of the report MUST follow the exact format of the output example
+        - Use the actual article titles, dates, and sources from the input
+        - Pay special attention to these keywords: {keywords}
+        - The report MUST be written in Traditional Chinese
+        - Every article Must have a summary and at least 3 key points
+        - The content of the report MUST be generated according to the content in Input Documents
+        - If Previous Report is provided, the new report MUST be generated based on Previous Report.
+        - (Very Important) Only change the part of the Previous Report requested by the user, and the rest of parts of Previous Report not mentioned by the user MUST remain unchanged
+
+        Report requirements:
+        - Base content strictly on provided articles (no additional information)
+        - Maintain objectivity (avoid speculation)
+        - Use clear structure and logical organization
+        - Highlight important data and key events
+        - Include specific information from original text when appropriate
+
+
+        Please begin generating the report:"""
+
+    
     if not request_data:
         return {"error": "Conversation history is missing or empty."}
     
@@ -114,6 +251,7 @@ def process_revision_request(request_data: dict, output_dir: str = None):
     number_of_news = 5
     keywords = ""
     report = ""
+    retrieved_article = []
     
     query = ""
     
@@ -147,7 +285,10 @@ def process_revision_request(request_data: dict, output_dir: str = None):
     
         diverse_docs = get_diverse_sources(vectorstore, initial_prompt, number_of_news)
         documents_text = "\n\n".join([doc.page_content for doc in diverse_docs])
-        request_data[0]["content"].append(documents_text)
+        for doc in diverse_docs:
+            retrieved_article.append({doc.page_content})
+        request_data[0]["content"] = retrieved_article
+        print(retrieved_article)
         summary_prompt = SUMMARY_PROMPT.format(
             keywords=', '.join(keywords),
             input_docs=documents_text,
@@ -175,7 +316,7 @@ def process_revision_request(request_data: dict, output_dir: str = None):
         report = output.content
         print(report)
         
-    return request_data, report
+    return retrieved_article, report
 
 
 # --- Main simulation function ---
@@ -189,7 +330,7 @@ def main():
     output_file = os.path.join(output_dir, "initial.md")
     
     # Initialize history file path
-    history_file = "../../firstQuery.json"
+    history_file = "../firstQuery.json"
     
     try:
         # Read history file
