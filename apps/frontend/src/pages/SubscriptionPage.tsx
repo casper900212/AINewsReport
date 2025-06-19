@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import Select from "react-select";
 import "../styles/SubscriptionPage.css";
 
 const currentYear = new Date().getFullYear();
@@ -16,7 +17,7 @@ const getMonthOptions = (year: number | null) => {
 
 const cronOptions = [
   { value: "", label: "未設定" },
-  { value: "0 9 1 * *", label: "每月一次" },
+  { value: "0 0 1 * *", label: "每月一次" },
 ];
 
 type Source = {
@@ -201,25 +202,15 @@ export default function SubscriptionPage() {
         <div className="form-group">
           <label>
             重複頻率：
-            <select
-              value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
-              className="form-select"
-              style={{ height: "48px", fontSize: "16px" }}
-            >
-              {cronOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            <Select
+              options={cronOptions}
+              value={cronOptions.find((opt) => opt.value === frequency) || null}
+              onChange={(opt) => setFrequency(opt?.value || "")}
+            />
           </label>
         </div>
-        <div style={{ textAlign: "center" }}>
-          <button
-            onClick={handleSave}
-            style={{ width: "150px", margin: "0 auto", backgroundColor: "#223e7b", color: "white" }}
-          >
+        <div style={{ textAlign: "right" }}>
+          <button className="search-button" onClick={handleSave}>
             儲存排程
           </button>
         </div>
@@ -267,35 +258,19 @@ export default function SubscriptionPage() {
               })),
             },
           ].map((item, idx) => (
-            <select
+            <Select
               key={idx}
-              value={item.value ?? ""}
-              onChange={(e) => item.setValue(Number(e.target.value))}
-              className="form-select"
-              style={{
-                height: "48px",
-                fontSize: "16px",
-                border: "1px solid #ccc",
-                borderRadius: "6px",
-                padding: "8px",
-              }}
-            >
-              <option value="" disabled style={{ padding: "8px" }}>
-                {item.placeholder}
-              </option>
-              {item.options.map((opt: any) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              options={item.options}
+              value={
+                item.options.find((opt) => opt.value === item.value) || null
+              }
+              isSearchable
+              placeholder={item.placeholder}
+            />
           ))}
         </div>
-        <div className="schedule-section" style={{ textAlign: "center" }}>
-          <button
-            onClick={handleManualTrigger}
-            style={{ width: "150px", margin: "0 auto", backgroundColor: "#223e7b", color: "white" }}
-          >
+        <div style={{ textAlign: "right" }}>
+          <button className="search-button" onClick={handleManualTrigger}>
             開始
           </button>
         </div>
