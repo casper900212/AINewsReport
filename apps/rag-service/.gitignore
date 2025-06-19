@@ -4,3 +4,4 @@ outputs
 qdrant_data
 data
 app/generator/__pycache__
+app/__pycache__
