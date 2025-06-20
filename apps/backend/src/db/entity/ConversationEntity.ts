@@ -12,9 +12,11 @@ export default class Conversation extends Base {
 
   @Column('jsonb', { nullable: true })
   filters?: {
-    industry?: string
-    keywords?: string[]
-    source?: string[]
-    dateRange?: string[]
+    type: string;
+    number: number;
+    industry?: string[];
+    keywords?: string[];
+    source?: string[];
+    dateRange?: string;
   }
 }
