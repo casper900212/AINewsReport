@@ -14,7 +14,7 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     output: str
-    sources: list
+    sources: List[dict]
 
 def retrieve_documents(query: str, top_k: int) -> List[str]:
     # TODO: 向量檢索

@@ -101,17 +101,17 @@ def get_diverse_sources(vectorstore, query: str, k: int = 5):
     return diverse_docs
 
 
-def process_revision_request(request_data: dict, output_dir: str = None):
+def process_revision_request(request_data: list[dict], output_dir: str = None): # Changed type hint to List[dict]
     
     SUMMARY_PROMPT = """You are a professional industry analyst responsible for generating monthly industry reports. You must generate a complete industry monthly report based on the provided articles. The report should include the following sections:
 
-        1. Industry Overview: Summarize the overall development of the Blockchain industry this month
+        1. Industry Overview: Summarize the overall development of the {industry} industry this month
         2. Article Summaries: Provide individual summaries for articles from different sources
         3. Key Points: Extract key points from each article
 
         Output Example:
 
-        # Blockchain Industry Monthly Report - January 2025
+        # {industry} Industry Monthly Report - January 2025
 
         **Industry Overview:**
 
@@ -250,25 +250,30 @@ def process_revision_request(request_data: dict, output_dir: str = None):
     target_date = ""
     number_of_news = 5
     keywords = ""
+    industry = ""
     report = ""
-    retrieved_article = []
+    retrieved_article = [] # This will store the formatted articles
+    request_counter = 0
     
     query = ""
     
-    for conv in request_data:
-        type = conv.get("type")
-        content = conv.get("content")
-        print(content)
 
-        if type == "system":
-            target_date = conv.get("date")
+    for conv in request_data:
+        if request_counter == 0:
+            # 'source' is not directly used for article content here, it's for passing back.
+            # So we'll populate retrieved_article directly.
+            target_date = conv.get("dateRange")
             number_of_news = conv.get("number")
             keywords = conv.get("keywords")
-
-        elif type == "human":
+            industry = conv.get("industry")
+        else:
+            content = conv.get("content")
             human.append(content)
-            memory.save_context({input: human[-1]},{"output": ""})            
-    
+            # This save_context might need adjustment if you intend to truly use conversation memory for LLM
+            # For this specific task, the prompt handles the "previous report" logic.
+            memory.save_context({"input": human[-1]}, {"output": ""}) # Corrected 'input' key
+        request_counter += 1
+
     llm = init_llm() # Ensure LLM is initialized
     
     if human:
@@ -285,12 +290,19 @@ def process_revision_request(request_data: dict, output_dir: str = None):
     
         diverse_docs = get_diverse_sources(vectorstore, initial_prompt, number_of_news)
         documents_text = "\n\n".join([doc.page_content for doc in diverse_docs])
+
+        # Populate retrieved_article in the desired format
         for doc in diverse_docs:
-            retrieved_article.append({doc.page_content})
-        request_data[0]["content"] = retrieved_article
-        print(retrieved_article)
+            retrieved_article.append({"article_content": doc.page_content}) # Corrected format
+        
+        # Update the 'source' key in the first (system) conversation entry with the retrieved articles
+        # This is for passing the articles back in the history for subsequent calls.
+        request_data[0]["source"].append(retrieved_article) 
+        print(retrieved_article) # For debugging
+
         summary_prompt = SUMMARY_PROMPT.format(
             keywords=', '.join(keywords),
+            industry=', '.join(industry),
             input_docs=documents_text,
             pre_report=""
         )
@@ -303,7 +315,17 @@ def process_revision_request(request_data: dict, output_dir: str = None):
         
     else:
         print("output file exists")
-        documents_text = request_data[0]["content"]
+        # Retrieve documents from the 'source' field of the system message in the request_data
+        # This assumes 'request_data[0]["source"]' was populated in a previous call.
+        
+        # Ensure request_data[0]["source"] exists and is a list of dicts with "article_content"
+        if request_data and request_data[0].get("source") and isinstance(request_data[0]["source"], list):
+            documents_text = "\n\n".join([doc.get("article_content", "") for doc in request_data[0]["source"]])
+            retrieved_article = request_data[0]["source"] # Use the existing retrieved articles for the return
+        else:
+            documents_text = "" # No previous articles found in history
+            print("Warning: 'source' not found or invalid in conversation history for revision.")
+
         summary_prompt = SUMMARY_PROMPT.format(
             keywords=', '.join(keywords),
             input_docs=documents_text,
@@ -347,6 +369,8 @@ def main():
         
         # Process the revision request
         newHistory, response_1 = process_revision_request(history, output)
+        
+        print(newHistory)
         
         # Write the response to output file
         with open(output_file, "w", encoding="utf-8") as f:
