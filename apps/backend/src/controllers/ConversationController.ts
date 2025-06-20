@@ -20,10 +20,12 @@ import {
 
 interface CreateConversationRequest {
   filters: {
-    industry?: string;
+    type: string;
+    number: number;
+    industry?: string[];
     keywords?: string[];
     source?: string[];
-    dateRange?: string[];
+    dateRange?: string;
   };
 }
 
