@@ -17,7 +17,7 @@ export class Message extends Base {
   conversation!: Conversation
 
   @Column()
-  role!: 'user' | 'assistant'
+  role!: 'user' | 'assistant' | 'human'
 
   @Column('text')
   content!: string

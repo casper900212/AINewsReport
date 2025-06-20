@@ -161,39 +161,6 @@ export default function SearchPanel({
               />
             </div>
 
-            <div className={`input-group ${sourceError ? "input-error" : ""}`}>
-              <Select
-                options={sourceOptions}
-                value={source}
-                onChange={(val) => {
-                  setSource([...(val || [])]);
-                  setSourceError(false);
-                }}
-                placeholder="選擇來源"
-                isMulti
-                isClearable
-                classNamePrefix="react-select"
-              />
-            </div>
-
-            <div className="input-group">
-              <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-                <Select
-                  options={yearOptions}
-                  value={yearOptions.find(opt => opt.value === selectedYear)}
-                  onChange={(val) => setSelectedYear(val?.value ?? currentYear)}
-                  placeholder="年份"
-                />
-
-                <Select
-                  options={monthOptions}
-                  value={monthOptions.find(opt => opt.value === selectedMonth)}
-                  onChange={(val) => setSelectedMonth(val?.value ?? currentMonth)}
-                  placeholder="月份"
-                />
-              </div>
-            </div>
-
             <div className="input-group">
               <input
                 type="text"
@@ -229,7 +196,27 @@ export default function SearchPanel({
               />
             </div>
 
-            <div className="search-button-wrapper">
+            <div className="input-group">
+              <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                <Select
+                  options={yearOptions}
+                  value={yearOptions.find(opt => opt.value === selectedYear)}
+                  onChange={(val) => setSelectedYear(val?.value ?? currentYear)}
+                  placeholder="年份"
+                />
+
+                <Select
+                  options={monthOptions}
+                  value={monthOptions.find(opt => opt.value === selectedMonth)}
+                  onChange={(val) => setSelectedMonth(val?.value ?? currentMonth)}
+                  placeholder="月份"
+                />
+              </div>
+            </div>
+
+            <div></div>
+
+            <div style={{ textAlign: 'right', maxWidth: '240px', width: '100%' }}>
               <button className="search-button" onClick={handleSearch}>
                 查詢
               </button>

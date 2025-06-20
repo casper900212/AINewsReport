@@ -4,7 +4,7 @@ import PromptHistory from './PromptHistory';
 
 interface ChatAppProps {
   conversationId: string;
-  messages: { role: 'user' | 'assistant'; content: string }[];
+  messages: { role: string; content: string }[];   // 允許任意 role
   onPromptChange?: (prompt: string) => void;
   onReplyChange?: (reply: string) => void;
 }
@@ -22,38 +22,40 @@ export default function ChatApp({
 }: ChatAppProps) {
   const [conversation, setConversation] = useState<Message[]>([]);
 
-  // 初始化從 props.messages 載入對話
   useEffect(() => {
-    const formatted: Message[] = messages.map((msg) => ({
-      role: msg.role === 'assistant' ? 'assistant' : 'user',
-      content: msg.content,
-    }));
-    setConversation(formatted);
+    if (!messages.length) return;
+  
+    const clean = messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+  
+    setConversation(clean);
   }, [messages]);
+  
 
+  /* 送出 prompt */
   const handleSubmit = async (message: Message) => {
-    // 加入使用者訊息
     setConversation((prev) => [...prev, message]);
     onPromptChange?.(message.content);
-
+  
     try {
       const res = await fetch(`http://localhost:3000/api/v1/conversations/${conversationId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: message.content }),
       });
-
-      if (!res.ok) {
-        throw new Error('後端回應失敗');
-      }
-
+  
+      if (!res.ok) throw new Error('後端回應失敗');
+  
       const data = await res.json();
+  
       const reply: Message = {
         role: 'assistant',
         content: data.data.response,
       };
-
+  
       setConversation((prev) => [...prev, reply]);
+  
       onReplyChange?.(reply.content);
     } catch (err) {
       console.error('儲存對話失敗：', err);
@@ -64,6 +66,9 @@ export default function ChatApp({
       setConversation((prev) => [...prev, errorReply]);
     }
   };
+  
+  
+  
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

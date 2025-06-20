@@ -218,6 +218,11 @@ export default function SubscriptionPage() {
 
       <section className="source-section">
         <h5>手動觸發爬蟲</h5>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '210px',fontSize: "16px" }}>
+          <div>開始時間</div>
+          <div>結束時間</div>
+          </div>
+
         <div
           style={{
             display: "grid",
