@@ -161,6 +161,7 @@ const callSystemService = async (query: string): Promise<string> => {
 };
 
 const callPythonRagService = async (query: string): Promise<string> => {
+  console.log('Query=========', query)
   try {
     console.log("[DEBUG] 傳送給 RAG 的 query:\n", query); // ← 加這一行
     const response = await fetch("http://localhost:8000/query", {
