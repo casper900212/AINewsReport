@@ -44,26 +44,37 @@ export default function ProductionPage() {
   }
 
   return (
-    <div style={{ background: "#fff", padding: "1rem", position: "relative", minHeight: "900px" , textAlign: "center"}}>
-      <h2>查詢結果報告</h2>  
-  <div
+    <div
       style={{
-        position: "absolute",
-        bottom: "1rem",
-        right: "1rem",
-        fontSize: "0.9rem",
-        color: "#555",
-        textAlign: "right",
+        background: "#fff",
+        padding: "1rem",
+        position: "relative",
+        minHeight: "900px",
+        textAlign: "center",
       }}
     >
-      {record.createdAt && (
-        <p style={{ margin: 0 }}>
-          建立時間：{new Date(record.createdAt).toLocaleString("zh-TW", { timeZone: "Asia/Taipei", hour12: false })}
-        </p>
-      )}
-      <p style={{ margin: 0 }}>最後爬蟲時間：{lastUpdatedTime}</p>
+      <h2>查詢結果報告</h2>
+      <div
+        style={{
+          position: "absolute",
+          bottom: "1rem",
+          right: "1rem",
+          fontSize: "0.9rem",
+          color: "#555",
+          textAlign: "right",
+        }}
+      >
+        {record.createdAt && (
+          <p style={{ margin: 0 }}>
+            建立時間：
+            {new Date(record.createdAt).toLocaleString("zh-TW", {
+              timeZone: "Asia/Taipei",
+              hour12: false,
+            })}
+          </p>
+        )}
+        <p style={{ margin: 0 }}>資料最新時間：{lastUpdatedTime}</p>
+      </div>
     </div>
-  </div>
-);
-  
+  );
 }

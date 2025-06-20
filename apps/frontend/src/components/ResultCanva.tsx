@@ -142,9 +142,9 @@ export default function ResultCanva({
         </p>
       </div>
 
-      {/* 最後爬蟲時間 */}
+      {/* 資料最新時間 */}
       <div className="updated-time" style={{ padding: "0 1rem 1rem" }}>
-        最後爬蟲時間：{lastUpdatedTime}
+        資料最新時間：{lastUpdatedTime}
       </div>
     </div>
   );

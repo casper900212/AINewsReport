@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import "../styles/SearchPanel.css";
-import { useNavigate } from "react-router-dom";
 
 export default function SearchPanel({
   onSearchComplete,
@@ -71,7 +71,8 @@ export default function SearchPanel({
 
   const handleSearch = async () => {
     const numericLimit = Number(limit);
-    const isLimitInvalid = !limit || isNaN(numericLimit) || numericLimit < 1 || numericLimit > 10;
+    const isLimitInvalid =
+      !limit || isNaN(numericLimit) || numericLimit < 1 || numericLimit > 10;
 
     setLimitError(isLimitInvalid);
 
@@ -97,7 +98,7 @@ export default function SearchPanel({
             dateRange: startMonth,
             source: [],
           },
-        }),
+        })
       });
 
       const data = await response.json();
@@ -123,10 +124,12 @@ export default function SearchPanel({
 
   return (
     <div>
-      <div className="last-updated-time">最後爬蟲時間：{lastUpdatedTime}</div>
+      <div className="last-updated-time">資料最新時間：{lastUpdatedTime}</div>
 
       <div className="search-panel-wrapper">
-        <div className={`search-panel-container ${animating ? "fade-out" : ""}`}>
+        <div
+          className={`search-panel-container ${animating ? "fade-out" : ""}`}
+        >
           <div className="search-panel-grid">
             <div className="input-group">
               <Select
@@ -178,19 +181,24 @@ export default function SearchPanel({
               <div style={{ display: "flex", gap: "8px", width: "100%" }}>
                 <Select
                   options={yearOptions}
-                  value={yearOptions.find(opt => opt.value === selectedYear)}
+                  value={yearOptions.find((opt) => opt.value === selectedYear)}
                   onChange={(val) => setSelectedYear(val?.value ?? currentYear)}
                   placeholder="年份"
                 />
 
                 <Select
                   options={monthOptions}
-                  value={monthOptions.find(opt => opt.value === selectedMonth)}
-                  onChange={(val) => setSelectedMonth(val?.value ?? currentMonth)}
+                  value={monthOptions.find(
+                    (opt) => opt.value === selectedMonth
+                  )}
+                  onChange={(val) =>
+                    setSelectedMonth(val?.value ?? currentMonth)
+                  }
                   placeholder="月份"
                 />
               </div>
             </div>
+            <div></div>
 
             <div></div>
 
