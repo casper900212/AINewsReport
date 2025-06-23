@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { MdCancel } from "react-icons/md";
 import jsPDF from "jspdf";
 import "../fonts/NotoSansTC";
+import { report, report2 } from '../utils/test-data';
+import ReactMarkdown from "react-markdown";
+import ReportViewer from "./Report";
 
 interface ResultCanvaProps {
   record: any;
@@ -9,6 +12,7 @@ interface ResultCanvaProps {
   onToggleCollapse: () => void;
   addProductionRecord: (record: any) => void;
   conversationId: number;
+  isSec: boolean
 }
 
 type Msg = { role: string; content: string };
@@ -17,6 +21,7 @@ export default function ResultCanva({
   record,
   onToggleCollapse,
   conversationId,
+  isSec,
 }: ResultCanvaProps) {
   const [lastUpdatedTime, setLastUpdatedTime] = useState<string>("");
   const [conversationMessages, setConversationMessages] = useState<Msg[]>([]);
@@ -133,17 +138,17 @@ export default function ResultCanva({
       </div>
 
       {/* 查詢結果區塊 */}
-      <div style={{ padding: "1rem" }}>
-        <p>
-          <strong>查詢結果：</strong>
-        </p>
-        <p style={{ whiteSpace: "pre-wrap" }}>
-          {humanResponse || "尚無查詢結果"}
-        </p>
+      <div style={{
+        padding: "1rem",
+        height: "82vh",
+        overflowY: "auto",
+      }}>
+        {/* <ReactMarkdown>{isSec ? report2 : report}</ReactMarkdown> */}
+        <ReportViewer isSec={isSec} report={report} report2={report2} />
       </div>
 
       {/* 資料最新時間 */}
-      <div className="updated-time" style={{ padding: "0 1rem 1rem" }}>
+      <div className="updated-time" style={{ padding: "1rem 1rem 1rem", borderTop: "1px solid #ddd" }}>
         資料最新時間：{lastUpdatedTime}
       </div>
     </div>

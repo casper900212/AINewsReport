@@ -198,7 +198,6 @@ export default function SearchPanel({
                 />
               </div>
             </div>
-            <div></div>
 
             <div></div>
 

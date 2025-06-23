@@ -15,6 +15,7 @@ export default function ResultPage() {
   );
 
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isSec, setIsSec] = useState(false);
   const handleToggleCollapse = () => setIsCollapsed((prev) => !prev);
   const refetchConversation = () => {
     fetch(`http://localhost:3000/api/v1/conversations/${conversationId}`)
@@ -69,8 +70,8 @@ export default function ResultPage() {
               (msg: any) => msg.role === "user" || msg.role === "assistant"
             )} 
             onPromptChange={(prompt) => setCurrentPrompt(prompt)}
-            onReplyChange={refetchConversation} 
-
+            onReplyChange={refetchConversation}
+            setting={setIsSec}
           />
         </div>
 
@@ -95,6 +96,7 @@ export default function ResultPage() {
             isCollapsed={isCollapsed}
             onToggleCollapse={handleToggleCollapse}
             conversationId={Number(conversationId)}
+            isSec={isSec}
           />
         </div>
 

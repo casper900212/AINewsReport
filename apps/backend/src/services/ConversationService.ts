@@ -39,11 +39,14 @@ export const createConversation = async (
   const userMessage = `查詢條件：\n${JSON.stringify(filters, null, 2)}`;
   await messageRepository.saveMessage(conversation.id, "user", userMessage);
 
+  // const sleep = new Promise(resolve => setTimeout(resolve, 30000))
+  // await sleep;
+
   // 儲存系統訊息（固定文字）
   await messageRepository.saveMessage(
     conversation.id,
     "assistant",
-    "已修改完成"
+    `收到！(${new Date().toDateString()})`,
   );
 
   // 呼叫 RAG 回應（human 角色）
@@ -87,7 +90,7 @@ export const handleMessageInConversation = async (
   await messageRepository.saveMessage(
     conversationId,
     "assistant",
-    "已修改完成"
+    `收到！(${new Date().toDateString()})`,
   );
 
   // 🔍 讀取整段對話紀錄
@@ -163,7 +166,7 @@ const callSystemService = async (query: string): Promise<string> => {
 const callPythonRagService = async (query: string): Promise<string> => {
   console.log('Query=========', query)
   try {
-    console.log("[DEBUG] 傳送給 RAG 的 query:\n", query); // ← 加這一行
+    console.log("[DEBUG] 傳送給 RAG 的 query:\n", query); 
     const response = await fetch("http://localhost:8000/query", {
       method: "POST",
       headers: {

@@ -9,7 +9,7 @@ interface PromptInputProps {
   onSubmit: (message: Message) => void;
 }
 
-export default function PromptInput({ onSubmit }: PromptInputProps) {
+export default function PromptInput({ onSubmit, setIsSec }: PromptInputProps) {
   const [prompt, setPrompt] = useState("");
 
   const handleSubmit = () => {
@@ -18,6 +18,7 @@ export default function PromptInput({ onSubmit }: PromptInputProps) {
 
     onSubmit({ role: "user", content: trimmed });
     setPrompt("");
+    setIsSec(true);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

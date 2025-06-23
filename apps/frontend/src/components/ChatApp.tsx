@@ -7,6 +7,7 @@ interface ChatAppProps {
   messages: { role: string; content: string }[];   // 允許任意 role
   onPromptChange?: (prompt: string) => void;
   onReplyChange?: (reply: string) => void;
+  setting: () => any;
 }
 
 interface Message {
@@ -19,6 +20,7 @@ export default function ChatApp({
   messages,
   onPromptChange,
   onReplyChange,
+  setting,
 }: ChatAppProps) {
   const [conversation, setConversation] = useState<Message[]>([]);
 
@@ -76,7 +78,7 @@ export default function ChatApp({
         <PromptHistory history={conversation} />
       </div>
       <div style={{ borderTop: '1px solid #ddd', padding: '0.5rem 1rem' }}>
-        <PromptInput onSubmit={handleSubmit} />
+        <PromptInput onSubmit={handleSubmit} setIsSec={setting} />
       </div>
     </div>
   );
