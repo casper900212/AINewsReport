@@ -41,7 +41,7 @@ def init_llm():
     if global_llm is None:
         if "GOOGLE_API_KEY" not in os.environ:
             os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter your Google AI API key: ")
-        global_llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash', temperature=0)
+        global_llm = ChatGoogleGenerativeAI(model='gemini-2.5-flash', temperature=0)
     return global_llm
 
 def extract_date_from_prompt(prompt: str, target_month: str = None) -> str:
