@@ -1,22 +1,28 @@
 {
-  "name": "news-monthly-reportnews-monthly-report",
-  "version": "1.0.0",
-  "description": "一個開源工具，用來爬取新聞網站並根據產業分類自動生成 Markdown 與 PDF 格式的月報。   內建支援本地語言模型（如 LLaMA3、Mistral via Ollama），方便部署於企業內部、學術或地方政府使用。",
-  "main": "index.js",
+  "name": "hackathon-news-generator",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@langchain/core": "^0.3.47",
-    "@langchain/ollama": "^0.2.0",
-    "@langchain/qdrant": "^0.1.2",
-    "@qdrant/js-client-rest": "^1.14.0",
-    "@tuesdaycrowd/sentence-transformers": "^1.0.1",
-    "langchain": "^0.3.24"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types"
   },
   "devDependencies": {
-    "@types/node": "^22.14.1"
+    "prettier": "^3.5.3",
+    "turbo": "^2.5.4",
+    "typescript": "5.8.2"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "overrides": {
+    "cron-validate": "1.4.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "cron-validate": "1.4.5"
+    }
   }
 }

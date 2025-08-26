@@ -1,0 +1,96 @@
+/* 外層垂直置中用 */
+.search-panel-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.search-panel-container {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  max-width: 1000px;
+  width: 100%;
+}
+.search-panel {
+  display: grid;
+  grid-template-columns: 240px 240px;
+  gap: 1rem 2rem;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+}
+
+.search-button {
+  padding: 8px 16px;         
+  min-width: 100px;        
+  font-size: 14px; 
+  height: fit-content;
+  background-color: #223e7b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.search-button:hover {
+  background-color: #3a53a4;
+}
+
+.input-group {
+  width: 240px;
+  background-color:transparent
+}
+
+.search-input {
+  width: 240px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.search-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem 2rem;
+  align-items: center;
+  justify-items: center;
+}
+
+
+.last-updated-time {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+}
+.fade-out {
+  animation: fadeOut 0.3s forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+.item-date {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.2rem;
+}
+.input-error .react-select__control {
+  border: 1px solid red !important;
+}
+
+.input-error input {
+  border: 1px solid red !important;
+}

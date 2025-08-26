@@ -1,27 +1,84 @@
-# 📰 News Monthly Report Generator
+# Turborepo starter
 
-一個開源工具，用來爬取新聞網站並根據產業分類自動生成 Markdown 與 PDF 格式的月報。  
-內建支援本地語言模型（如 LLaMA3、Mistral via Ollama），方便部署於企業內部、學術或地方政府使用。
+This Turborepo starter is maintained by the Turborepo core team.
 
----
+## Using this example
 
-## 🚀 功能特色
+Run the following command:
 
-<!-- - 🕷 使用 Scrapy / newspaper3k 自動抓取新聞網站
-- 🧼 清洗與斷句處理
-- 🔍 使用 MiniLM-L6-v2 生成嵌入向量，並儲存於 Qdrant 向量資料庫
-- 🤖 結合 LangChain Retriever 與本地 LLM，生成 Markdown 格式月報
-- 📄 將 Markdown 匯出為 PDF（使用 WeasyPrint）
-- ⚙️ 可透過 GitHub Actions / Cloudflare Cron 定期排程生成 -->
-
----
-
-## ⚙️ 快速啟動
-
-```bash
-# git clone https://github.com/your-org/news-monthly-report
-# cd news-monthly-report
-# cp .env.example .env
-bash scripts/setup_ollama.sh        # 安裝 & 拉取本地 LLM 模型
-docker-compose up --build           # 啟動服務（含 Qdrant 向量資料庫）
+```sh
+npx create-turbo@latest
 ```
+
+## What's inside?
+
+This Turborepo includes the following packages/apps:
+
+### Apps and Packages
+
+- `docs`: a [Next.js](https://nextjs.org/) app
+- `web`: another [Next.js](https://nextjs.org/) app
+- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
+- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
+- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+
+Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+
+### Utilities
+
+This Turborepo has some additional tools already setup for you:
+
+- [TypeScript](https://www.typescriptlang.org/) for static type checking
+- [ESLint](https://eslint.org/) for code linting
+- [Prettier](https://prettier.io) for code formatting
+
+### Build
+
+To build all apps and packages, run the following command:
+
+```
+cd my-turborepo
+pnpm build
+```
+
+### Develop
+
+To develop all apps and packages, run the following command:
+
+```
+cd my-turborepo
+pnpm dev
+```
+
+### Remote Caching
+
+> [!TIP]
+> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+
+Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+
+By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+
+```
+cd my-turborepo
+npx turbo login
+```
+
+This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+
+Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+
+```
+npx turbo link
+```
+
+## Useful Links
+
+Learn more about the power of Turborepo:
+
+- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
+- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
+- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
+- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
+- [Configuration Options](https://turborepo.com/docs/reference/configuration)
+- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)

@@ -1,0 +1,55 @@
+.prompt-history {
+  padding: 1rem;
+  background-color: #f8f8f8;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.prompt-history-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+.chat-history-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chat-message {
+  max-width: 100%;
+  padding: 10px 14px;
+  white-space: pre-wrap; 
+  background-color: #ede7e7;
+  align-self: flex-start;
+  margin: 6px 0;
+  border-radius: 8px;
+  word-wrap: break-word;
+}
+
+.chat-message.user {
+  background-color:#cbd0e3;
+  align-self: flex-end;
+  text-align: left;
+}
+
+.chat-message.bot {
+  background-color: #e6e6e6;
+  align-self: flex-start;
+  text-align: left;
+}
+.prompt-history-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapse-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}

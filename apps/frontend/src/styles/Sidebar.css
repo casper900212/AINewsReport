@@ -1,0 +1,172 @@
+/* ────────── Sidebar 容器 ────────── */
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  transition: width 0.3s ease;
+  overflow: visible;
+  background-color: #fcfcfc;
+  color: #000;
+  border-right: 1px solid #f1ecec;
+  position: relative;
+}
+
+.sidebar.collapsed {
+  width: 1.5rem;
+  border-right: none;
+}
+
+.sidebar-header {
+  height: 2.5rem;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5rem 1rem;
+  position: relative;
+}
+
+/* ────────── 收合按鈕 ────────── */
+.sidebar-collapse-button {
+  all: unset;
+  position: absolute;
+  top: 1rem;
+  right: 0.1rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+  z-index: 10;
+}
+
+.sidebar-collapse-button:hover {
+  background-color: #d0d0d0;
+}
+
+/* ────────── 按鈕群區 ────────── */
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 20px;
+}
+
+/* ────────── 通用項目 ────────── */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  color: #000;
+  transition: background-color 0.2s;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-item.active {
+  background-color: #e0e0e0;
+}
+
+.sidebar-item:hover {
+  background-color: #f0f0f0;
+}
+
+/* ────────── 子項目 ────────── */
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-sublist {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1.5rem;
+  gap: 0.25rem;
+}
+
+.sidebar-subitem {
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #333;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.sidebar-subitem:hover {
+  background-color: #f0f0f0;
+}
+/* ────────── 子項目包裝（加刪除按鈕用） ────────── */
+.sidebar-subitem-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding-right: 0.5rem;
+}
+
+/* 若要讓整列 hover 起來，套在 wrapper 上 */
+.sidebar-subitem-wrapper:hover {
+  background-color: #f0f0f0;
+  border-radius: 6px;
+}
+
+/* 刪除按鈕樣式 */
+/* 刪除按鈕樣式 */
+.sidebar-delete-button {
+  background: none;
+  border: none;
+  padding: 0.3rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+/* 預設 icon 顏色為灰色 */
+.sidebar-delete-button {
+  background: none;
+  border: none;
+  padding: 0.3rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: transparent;
+}
+
+/* icon 保持灰色 */
+.delete-icon {
+  color: #666;
+}
+
+.item-info {
+  font-size: 13px;
+}
+
+.semi-select {
+  background-color: transparent !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
